@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+package ZPWT_ZerotouchPersonalWifiTimetracker;
+
+option java_package = "com.example.mfind.zpwtzerotouchpersonalwifitimetracker";
+option java_outer_classname = "WIFIConnectionTime";
+
+message PersistentData {
+  repeated Day day = 1;
+}
+
+message Day {
+  optional int32 year = 1;
+  optional int32 month = 2;
+  optional int32 day = 3;
+  optional int32 ticker_seconds = 4;  // sum of automated measurements
+  
+  message Edit {
+    optional int32 minute_of_day = 1; // edit local time
+    optional int32 delta_minutes = 2; // can be negative
+    optional string comment = 3;
+  }
+
+  repeated Edit edits = 5; // repeated edits? okeey
+}
+

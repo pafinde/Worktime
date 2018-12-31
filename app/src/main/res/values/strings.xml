@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ZPWTZerotouchPersonalWifiTimetracker</string>
+    <string name="set_regexp_string">Set regexp</string>
+    <string name="edit_message">Enter a message</string>
+    <string name="button_send">Send</string>
+    <string name="averageListing_str">Average</string>
+    <string name="todayListing_str">Today</string>
+    <string name="previous_30_days_str">Previous 30 days:</string>
+    <string name="previous_90_days_str">Previous 90 days:</string>
+    <string name="previous_7_days_str">Previous 7 days:</string>
+</resources>
