@@ -61,21 +61,6 @@ public class FileManipulationsPersistentData extends Service {
         valuesInitialized = false;
     }
 
-    /**
-    void actTest(double r){
-        System.out.println("### " + r);
-    }
-    void recTest(){
-        System.out.println("### ----->> Receiver Entered!");
-        try {
-            sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("### ----->> Receiver Leaved!");
-    }
-     //*/
-
     long getTodayTicker(){
         updateValuesForReading();
         return todayTicker;
