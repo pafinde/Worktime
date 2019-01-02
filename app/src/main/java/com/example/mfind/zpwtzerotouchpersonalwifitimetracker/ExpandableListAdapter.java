@@ -140,7 +140,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                     layout.setOrientation(LinearLayout.VERTICAL);
 
                     final EditText inputTime = new EditText(context);
-                    inputTime.setHint("([-]%dh %dmin %ds) or ([-]%d %d %d)");
+                    inputTime.setHint("([-]%dh %dmin) or ([-]%d %d)");
                     layout.addView(inputTime); // Notice this is an add method
 
                     final EditText inputComment = new EditText(context);
@@ -188,18 +188,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     }
     private void enterAnEdit(int index, String comment, String edit){
         int multiplier = edit.charAt(0)=='-' ? -1 : 1;
-        int seconds = 0;
-        edit = edit.replaceAll( "[-hmins]", " " );
+        int minutes = 0;
+        edit = edit.replaceAll( "[-hmin]", " " );
         Scanner s = new Scanner(edit);
-        seconds += s.nextInt()*60*60;
-        seconds += s.nextInt()*60;
-        seconds += s.nextInt();
-        seconds *= multiplier;
+        minutes += s.nextInt()*60;
+        minutes += s.nextInt();
+
+        minutes *= multiplier;
 
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        fm.setContext(context); // i dont know if this will work
+        fm.setContext(context);
 
-        fm.addEditEntry(index, comment, seconds);
+        fm.addEditEntry(index, comment, minutes);
     }
 
     @Override

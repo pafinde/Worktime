@@ -220,7 +220,7 @@ public class FileManipulationsPersistentData extends Service {
 
         for(int i = 1; i < wifiData.getDayCount(); i++){
             WIFIConnectionTime.Day day = wifiData.getDay(i);
-            int temp = day.getTickerSeconds() + getSumOfDeltaMinutesFromEdits(day);
+            int temp = day.getTickerSeconds() + InSeconds(day);
             if(temp != 0) {
                 LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
                 if(i <= 7 && !localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
@@ -241,16 +241,16 @@ public class FileManipulationsPersistentData extends Service {
         average7  = (notZeroDaysCount7  != 0 ? (average7  / notZeroDaysCount7 ) : 0);
         average30 = (notZeroDaysCount30 != 0 ? (average30 / notZeroDaysCount30) : 0);
         average90 = (notZeroDaysCount90 != 0 ? (average90 / notZeroDaysCount90) : 0);
-        todayTicker = wifiData.getDay(0).getTickerSeconds();
+        todayTicker = wifiData.getDay(0).getTickerSeconds() + InSeconds(wifiData.getDay(0));
 
         valuesInitialized = true;
     }
 
-    public static int getSumOfDeltaMinutesFromEdits(final WIFIConnectionTime.Day day){
+    public static int InSeconds(final WIFIConnectionTime.Day day){
         int sum = 0;
         for(int j = 0; j < day.getEditsCount(); j++)
             sum += day.getEdits(j).getDeltaMinutes();
-        return sum;
+        return sum  * 60;
     }
 
     /// used only when first launching the application
@@ -290,6 +290,8 @@ public class FileManipulationsPersistentData extends Service {
             temp[0].delete();
         if(temp.length >= 2)
             temp[1].delete();
+        if(temp.length >= 3)
+            temp[2].delete();
     }
 
     protected WIFIConnectionTime.PersistentData.Builder readDataFromMemory(){

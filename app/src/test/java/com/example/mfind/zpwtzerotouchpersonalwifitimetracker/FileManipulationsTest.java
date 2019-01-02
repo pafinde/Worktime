@@ -25,7 +25,7 @@ class FileManipulationsForTesting extends FileManipulationsPersistentData {
 
         for(int i = 1; i < wifiData.getDayCount(); i++){
             WIFIConnectionTime.Day day = wifiData.getDay(i);
-            int temp = day.getTickerSeconds() + getSumOfDeltaMinutesFromEdits(day);
+            int temp = day.getTickerSeconds() + InSeconds(day);
             if(temp != 0) {
                 LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
                 if(i <= 7 && !localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){

@@ -106,7 +106,7 @@ public class EntriesEditor extends AppCompatActivity {
                 listHash.put(listDataHeader.get(repetition), m[repetition]);
                 //System.out.println("### -> " + listHash);
             }
-            int sumOfSecs = wifiData.getDay(i).getTickerSeconds() + FileManipulationsPersistentData.getSumOfDeltaMinutesFromEdits(wifiData.getDay(i));
+            int sumOfSecs = wifiData.getDay(i).getTickerSeconds() + FileManipulationsPersistentData.InSeconds(wifiData.getDay(i));
             m[repetition].add(wifiData.getDay(i).getDay() + "/" + tempMonth + "/" + wifiData.getDay(i).getYear() + "  -  " + changeSecondsToFormat(sumOfSecs));
         }
     }

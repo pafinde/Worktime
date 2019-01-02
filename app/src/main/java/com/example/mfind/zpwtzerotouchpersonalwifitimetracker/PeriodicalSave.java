@@ -62,9 +62,9 @@ public class PeriodicalSave extends JobService {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if(!mBoundedReceiver) {
-                mBoundedReceiver = true;
                 NetworkStateCheck.LocalBinder mLocalBinder = (NetworkStateCheck.LocalBinder) service;
                 mServerReceiver = mLocalBinder.getServerInstance();
+                mBoundedReceiver = true;
             }
         }
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Mateusz Findeisen
+Copyright 2018-2019 Mateusz Findeisen
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -179,8 +179,7 @@ public class MainActivity extends AppCompatActivity {
     private void scheduleJob(){
         ComponentName compName = new ComponentName(this, PeriodicalSave.class);
         JobInfo.Builder info = new JobInfo.Builder(1, compName)
-            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
-            .setPeriodic(15 * 60 * 1000, 5 * 60 * 1000) // job is set to fire regularly every 15 minutes, with up to 5 minutes of fluctuation
+            .setPeriodic(15 * 60 * 1000, 60 * 1000) // job is set to fire regularly every 15 minutes, with up to 5 minutes of fluctuation
             .setPersisted(true);
         if (Build.VERSION.SDK_INT >= 28)
             info.setEstimatedNetworkBytes(0, 0);
