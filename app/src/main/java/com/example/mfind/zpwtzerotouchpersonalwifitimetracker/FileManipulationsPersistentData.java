@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -167,18 +168,28 @@ public class FileManipulationsPersistentData extends Service {
     protected WIFIConnectionTime.PersistentData.Builder prependWithEmptyDays(WIFIConnectionTime.PersistentData.Builder wifiData){
         WIFIConnectionTime.Day.Builder dayBuilder = WIFIConnectionTime.Day.newBuilder();
 
+
         for(int i = 0;; i++){
             LocalDate dayDate = LocalDate.now().minusDays(i);
             WIFIConnectionTime.Day dayData = wifiData.getDay(i);
 
-            if(dayDate.equals(LocalDate.of(dayData.getYear(), dayData.getMonth(), dayData.getDay())))
+            LocalDate tempDate = LocalDate.of(dayData.getYear(), dayData.getMonth(), dayData.getDay());
+
+            if(dayDate.equals(tempDate))
                 break;
+            if(dayDate.isBefore(tempDate)) { // this means that we changed timezone backwards (our current day is lower than it once was before)
+                int temp = dayData.getTickerSeconds() + inSeconds(dayData);
+                Toast.makeText(context, "Sorry, special case, removing newest day, deleted: " + temp + "s", Toast.LENGTH_LONG).show();
+                wifiData.removeDay(0);
+                continue;
+            }
             dayBuilder.setYear(dayDate.getYear());
             dayBuilder.setMonth(dayDate.getMonthValue());
             dayBuilder.setDay(dayDate.getDayOfMonth());
             dayBuilder.setTickerSeconds(0);
             wifiData.addDay(i, dayBuilder);
         }
+
         return deleteExcessDays(wifiData);
     }
 
@@ -205,7 +216,7 @@ public class FileManipulationsPersistentData extends Service {
 
         for(int i = 1; i < wifiData.getDayCount(); i++){
             WIFIConnectionTime.Day day = wifiData.getDay(i);
-            int temp = day.getTickerSeconds() + InSeconds(day);
+            int temp = day.getTickerSeconds() + inSeconds(day);
             if(temp != 0) {
                 LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
                 if(i <= 7 && !localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
@@ -226,12 +237,12 @@ public class FileManipulationsPersistentData extends Service {
         average7  = (notZeroDaysCount7  != 0 ? (average7  / notZeroDaysCount7 ) : 0);
         average30 = (notZeroDaysCount30 != 0 ? (average30 / notZeroDaysCount30) : 0);
         average90 = (notZeroDaysCount90 != 0 ? (average90 / notZeroDaysCount90) : 0);
-        todayTicker = wifiData.getDay(0).getTickerSeconds() + InSeconds(wifiData.getDay(0));
+        todayTicker = wifiData.getDay(0).getTickerSeconds() + inSeconds(wifiData.getDay(0));
 
         valuesInitialized = true;
     }
 
-    public static int InSeconds(final WIFIConnectionTime.Day day){
+    public static int inSeconds(final WIFIConnectionTime.Day day){
         int sum = 0;
         for(int j = 0; j < day.getEditsCount(); j++)
             sum += day.getEdits(j).getDeltaMinutes();

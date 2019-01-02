@@ -41,6 +41,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.time.LocalDateTime;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -69,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
         mBoundedFileManipulator = false;
 
         getServiceStartedIfNeeded();
-
     }
 
     @Override

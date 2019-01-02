@@ -202,11 +202,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         }
         edit = edit.replaceAll("[ ]", "");
 
-        if(edit.length() < 3){
-            System.out.println("### User input error! Short string: " + edit);
-            errorHandler();
-            return;
-        }
         if(edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
             System.out.println("### User input error! First char is neither digit nor '-': " + edit);
             errorHandler();
@@ -217,6 +212,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             errorHandler();
             return;
         }
+
         String toParse = "";
         if(edit.charAt(0) != '-')
             toParse += "PT";
