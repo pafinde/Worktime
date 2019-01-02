@@ -28,11 +28,16 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+
+import static java.lang.Character.isDigit;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
     private static final String TAG = "ExpandableListAdapter";
@@ -140,7 +145,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                     layout.setOrientation(LinearLayout.VERTICAL);
 
                     final EditText inputTime = new EditText(context);
-                    inputTime.setHint("([-]%dh %dmin) or ([-]%d %d)");
+                    inputTime.setHint("[-]PT%dh %dm");
                     layout.addView(inputTime); // Notice this is an add method
 
                     final EditText inputComment = new EditText(context);
@@ -187,19 +192,72 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return fm.findIndexByDate(mYear, mMonth, mDay);
     }
     private void enterAnEdit(int index, String comment, String edit){
-        int multiplier = edit.charAt(0)=='-' ? -1 : 1;
-        int minutes = 0;
-        edit = edit.replaceAll( "[-hmin]", " " );
-        Scanner s = new Scanner(edit);
-        minutes += s.nextInt()*60;
-        minutes += s.nextInt();
+        edit = edit.toUpperCase().replaceAll("[^PT0123456789\\-HM]", " ");
+        for(int i = 1; i < edit.length()-1; i++){
+            if(edit.charAt(i) == ' ' && isLastCharADigit(edit.substring(0, i)) && isFirstCharADigit(edit.substring(i+1))){
+                System.out.println("### User input error! at: " + i + " of: " + edit);
+                errorHandler();
+                return;
+            }
+        }
+        edit = edit.replaceAll("[ ]", "");
 
-        minutes *= multiplier;
+        if(edit.length() < 3){
+            System.out.println("### User input error! Short string: " + edit);
+            errorHandler();
+            return;
+        }
+        if(edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
+            System.out.println("### User input error! First char is neither digit nor '-': " + edit);
+            errorHandler();
+            return;
+        }
+        if(edit.charAt(0) == '-' && (edit.charAt(1) != 'P' || edit.charAt(2) != 'T')){
+            System.out.println("### User input error! '-' without \"PT\": " + edit);
+            errorHandler();
+            return;
+        }
+        String toParse = "";
+        if(edit.charAt(0) != '-')
+            toParse += "PT";
+        toParse += edit;
+        System.out.println("### Current String: " + toParse);
+
+        int minutes = 0;
+        try {
+            minutes = (int) Duration.parse(toParse).toMinutes();
+        }catch(DateTimeParseException e){
+            System.out.println("### ### ### parse exception!");
+        }
+        System.out.println("### EDIT: adding " + minutes + " minutes!");
 
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         fm.setContext(context);
 
         fm.addEditEntry(index, comment, minutes);
+    }
+
+    private Boolean isLastCharADigit(String seq){
+        for(int i = seq.length()-1; i >= 0; i--) {
+            if (isDigit(seq.charAt(i)))
+                return true;
+            if (seq.charAt(i) != ' ')
+                return false;
+        }
+        return false;
+    }
+    private Boolean isFirstCharADigit(String seq){
+        for(int i = 0; i < seq.length(); i++) {
+            if (isDigit(seq.charAt(i)))
+                return true;
+            if (seq.charAt(i) != ' ')
+                return false;
+        }
+        return false;
+    }
+
+    private void errorHandler(){
+        Toast.makeText(context, "Sorry, but your input hasn't met the criteria!", Toast.LENGTH_LONG).show();
     }
 
     @Override
