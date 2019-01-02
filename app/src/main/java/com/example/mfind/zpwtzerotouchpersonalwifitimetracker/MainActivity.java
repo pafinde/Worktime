@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
     static final int MIN_DISTANCE = 150;
     static final int MAX_SWIPE_TIME = 200;
 
-    private String wifiSSID = "";
     private Context context;
 
     @Override
@@ -192,13 +191,6 @@ public class MainActivity extends AppCompatActivity {
         else
             System.out.println("### Job scheduler failure!");
     }
-    /**
-    private void cancelJob(View v){
-        JobScheduler scheduler = (JobScheduler)getSystemService(JOB_SCHEDULER_SERVICE);
-        scheduler.cancel(1);
-        System.out.println("### Job cancelled!");
-    }
-     //*/
 
     private void getServiceStartedIfNeeded(){
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -234,14 +226,7 @@ public class MainActivity extends AppCompatActivity {
         mServerFileManipulator.invalidateInitialization();
         refreshValues();
     }
-/**
-    public void edit(View view){
-        System.out.println("### Clicked edit.");
 
-        Intent intent = new Intent(this, EntriesEditor.class);
-        startActivity(intent);
-    }
-//*/
     private String changeSecondsToFormat(long seconds){
         return seconds/(60*60) + "h " + (seconds%(60*60))/60 + "min " + seconds%60 + "s";
     }
