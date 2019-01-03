@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import java.util.Objects;
 
@@ -214,7 +215,7 @@ public class NetworkStateCheck extends Service {
             } while(currentNetworkSSID.equals("<unknown ssid>")); // to detect '<repeat if read was unsuccessful ssid>'
             System.out.println("### Currently connected to " + currentNetworkSSID);
 
-            currentWifiIsCorrect = currentNetworkSSID.equals(wifiSSIDRegexp);
+            currentWifiIsCorrect = currentNetworkSSID.matches(wifiSSIDRegexp);
             if(currentWifiIsCorrect)
                 detectShortBreak();
             connectionStartTime = SystemClock.elapsedRealtime();
@@ -239,6 +240,7 @@ public class NetworkStateCheck extends Service {
             public void onReceive(Context context, Intent intent) {
                 if (Objects.equals(intent.getAction(), WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                     // Do your work.
+                    Toast.makeText(context, "Wifi state changed!", Toast.LENGTH_LONG).show();
                     int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
                     switch (state) {
                         case -1:
