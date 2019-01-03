@@ -41,14 +41,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.time.LocalDateTime;
-
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
-
-    //public static final String EXTRA_MESSAGE = "com.example.mfind.zpwtzerotouchpersonalwifitimetracker.MESSAGE";
-    public static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1234;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
     boolean mBoundedReceiver, mBoundedFileManipulator;
     NetworkStateCheck mServerReceiver;
@@ -208,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                 // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+                        LOCATION_PERMISSION_REQUEST_CODE);
             }
         }
         final Intent service = new Intent(context, NetworkStateCheck.class);

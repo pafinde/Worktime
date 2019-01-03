@@ -40,8 +40,6 @@ import java.util.Scanner;
 import static java.lang.Character.isDigit;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
-    private static final String TAG = "ExpandableListAdapter";
-
     private int entryindex;
 
     private Context context;

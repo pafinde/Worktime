@@ -10,7 +10,6 @@ import android.os.IBinder;
 import static java.lang.Thread.sleep;
 
 public class PeriodicalSave extends JobService {
-    private static final String TAG = "SyncService";
 
     boolean mBoundedReceiver = false;
     NetworkStateCheck mServerReceiver;

@@ -27,14 +27,8 @@ import java.util.List;
 
 public class EntriesEditor extends AppCompatActivity {
 
-    private static final String TAG = "EntriesEditor";
-
     private List<String> listDataHeader;
     private HashMap<String, List<String>> listHash;
-
-    private float x1,x2;
-    private long startClickTime;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,36 +42,6 @@ public class EntriesEditor extends AppCompatActivity {
         ExpandableListAdapter listAdapter = new ExpandableListAdapter(this, listDataHeader, listHash);
         listView.setAdapter(listAdapter);
     }
-/**
-    @ Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        switch(event.getAction())
-        {
-            case MotionEvent.ACTION_DOWN:
-                startClickTime = Calendar.getInstance().getTimeInMillis();
-                x1 = event.getX();
-                break;
-            case MotionEvent.ACTION_UP:
-                long clickDuration = Calendar.getInstance().getTimeInMillis() - startClickTime;
-                x2 = event.getX();
-                float deltaX = x2 - x1;
-                if (Math.abs(deltaX) > MIN_DISTANCE && clickDuration < MAX_SWIPE_TIME)
-                {
-                    System.out.println("### Swiped right2left.");
-
-                    Intent intent = new Intent(this, EntriesEditor.class);
-                    startActivity(intent);
-                }
-                else
-                {
-                    // consider as something else - a screen tap for example
-                }
-                break;
-        }
-        return super.onTouchEvent(event);
-    }
-//*/
 
     private String changeSecondsToFormat(long seconds){
         return seconds/(60*60) + "h " + (seconds%(60*60))/60 + "min " + seconds%60 + "s";

@@ -23,11 +23,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.time.DateTimeException;
-import java.time.LocalDate;
 
 public class FileManipulationsApplicationInfo extends Service {
     private String APPLICATION_DATA_FILENAME = "ZPWT_ApplicationData.bin";
@@ -78,18 +75,6 @@ public class FileManipulationsApplicationInfo extends Service {
         }
     }
 
-    public void setMaxBreakTime(int breakTime){
-        if(!initialized)
-            appInfo = readDataFromMemory();
-        appInfo.setMaxBreakTime(breakTime);
-        try {
-            writeDataToMemory(appInfo.build());
-        } catch (IOException e) {
-            System.out.println("### Output stream error.");
-            e.printStackTrace();
-        }
-    }
-
     /// used only when first launching the application
     private void prefillWithData(){
         ApplicationInfo.AppInfo.Builder appInfo = ApplicationInfo.AppInfo.newBuilder();
@@ -105,7 +90,7 @@ public class FileManipulationsApplicationInfo extends Service {
 
     private ApplicationInfo.AppInfo.Builder readDataFromMemory(){
         ApplicationInfo.AppInfo.Builder appInfo = ApplicationInfo.AppInfo.newBuilder();
-        // Read the existing address book.
+        // Read the existing data file.
         try {
             appInfo.mergeFrom(context.openFileInput(APPLICATION_DATA_FILENAME));
         } catch (FileNotFoundException e) {

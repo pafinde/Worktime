@@ -274,25 +274,7 @@ public class FileManipulationsPersistentData extends Service {
         }
     }
 
-
-    private void deleteProtoFile(){
-        System.out.println("### ### ### I'm deleteing protofile!");
-        File file = context.getFilesDir();
-        File temp[] = file.listFiles();
-        for(int i = 0; i < temp.length; ++i)
-            System.out.println("### File number " + i + " to " + temp[i]);
-        //noinspection ResultOfMethodCallIgnored
-        if(temp.length >= 1)
-            temp[0].delete();
-        if(temp.length >= 2)
-            temp[1].delete();
-        if(temp.length >= 3)
-            temp[2].delete();
-    }
-
     protected WIFIConnectionTime.PersistentData.Builder readDataFromMemory(){
-        //deleteProtoFile();
-
         WIFIConnectionTime.PersistentData.Builder wifiConnectionTimeList = WIFIConnectionTime.PersistentData.newBuilder();
         // Read the existing address book.
         try {
