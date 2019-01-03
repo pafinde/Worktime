@@ -239,7 +239,8 @@ public class MainActivity extends AppCompatActivity {
         // Set up the input
         final EditText input = new EditText(this);
         // Specify the type of input expected;
-        input.setHint(mServerReceiver.getCurrentSSID());
+        input.setHint("SSID regex");
+        input.setText(mServerReceiver.getCurrentSSID());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
         builder.setTitle("Enter regex of SSID (name) of network to monitor for you");

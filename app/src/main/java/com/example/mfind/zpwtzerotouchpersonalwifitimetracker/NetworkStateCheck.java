@@ -33,7 +33,7 @@ public class NetworkStateCheck extends Service {
     private String currentNetworkSSID = "";
     private Boolean currentWifiIsCorrect = false;
 
-    private static final String CHANNEL_ID = "ZPWT";
+    private static final String CHANNEL_ID = "ZPWT notification - service is working";
     private long connectionStartTime;
 
     private Context context;
