@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ZPWTZerotouchPersonalWifiTimetracker</string>
+    <string name="app_name">Worktime</string>
     <string name="set_regexp_string">Set regexp</string>
     <string name="edit_message">Enter a message</string>
     <string name="button_send">Send</string>

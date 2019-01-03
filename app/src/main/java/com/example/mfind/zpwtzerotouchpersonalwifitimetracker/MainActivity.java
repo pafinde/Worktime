@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         input.setText(mServerReceiver.getCurrentSSID());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
-        builder.setTitle("Enter regex of SSID (name) of network to monitor for you");
+        builder.setTitle("Enter regex of wifi name (SSID) to track");
 
         // Set up the buttons: positive - changer
         builder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
