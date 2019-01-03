@@ -11,7 +11,6 @@ class FileManipulationsForTesting extends FileManipulationsPersistentData {
 
     @Override
     protected void updateValuesForReading(){
-        return;
     }
 
     protected void updateValuesForReading(WIFIConnectionTime.PersistentData wifiData){

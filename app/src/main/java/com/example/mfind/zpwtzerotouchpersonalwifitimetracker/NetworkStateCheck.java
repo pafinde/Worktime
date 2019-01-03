@@ -18,15 +18,10 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
-
-import java.util.Objects;
 
 import static java.lang.Thread.sleep;
 
 public class NetworkStateCheck extends Service {
-
-    private static final String TAG = "NetworkStateCheck";
 
     private String wifiSSIDRegexp = "";
     private int maxBreakTime = 0;
@@ -38,10 +33,6 @@ public class NetworkStateCheck extends Service {
 
     private Context context;
 
-    /**
-    boolean mBoundedFileManipulator;
-    FileManipulationsPersistentData mServerFileManipulator;
-     //*/
     FileManipulationsPersistentData fmpd;
     FileManipulationsApplicationInfo fmai;
 

@@ -1,11 +1,11 @@
 syntax = "proto2";
 
-package ZPWT_ZerotouchPersonalWifiTimetracker;
+package timetracker;
 
-option java_package = "com.example.mfind.zpwtzerotouchpersonalwifitimetracker";
-option java_outer_classname = "WIFIConnectionTime";
+option java_package = "com.example.mfind.timetracker";
+option java_outer_classname = "TimeProto";
 
-message PersistentData {
+message TimeData {
   repeated Day day = 1;
 }
 
@@ -21,6 +21,6 @@ message Day {
     optional string comment = 3;
   }
 
-  repeated Edit edits = 5; // repeated edits? okeey
+  repeated Edit edits = 5;
 }
 

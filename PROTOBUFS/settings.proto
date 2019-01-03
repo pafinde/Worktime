@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package timetracker;
+
+option java_package = "com.example.mfind.timetracker"
+option java_outer_classname = "SettingsProto";
+
+message AppSettings {
+  optional string ssid = 1;
+  optional int32 max_break_time = 2;
+}
