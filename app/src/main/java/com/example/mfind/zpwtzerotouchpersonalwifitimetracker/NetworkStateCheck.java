@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
@@ -189,8 +190,8 @@ public class NetworkStateCheck extends Service {
         super.onLowMemory();
     }
 
-    private void startOrStopCounting(int type){
-        if(type == 3){
+    private void startOrStopCounting(Boolean type){
+        if(type){
             // e.g. To check the Network Name or other info:
             do{
                 currentNetworkSSID = ""; // emptying - might be needed
@@ -215,17 +216,20 @@ public class NetworkStateCheck extends Service {
             } while(currentNetworkSSID.equals("<unknown ssid>")); // to detect '<repeat if read was unsuccessful ssid>'
             System.out.println("### Currently connected to " + currentNetworkSSID);
 
-            currentWifiIsCorrect = currentNetworkSSID.matches(wifiSSIDRegexp);
-            if(currentWifiIsCorrect)
-                detectShortBreak();
             connectionStartTime = SystemClock.elapsedRealtime();
-        }else if(type == 1)
-            if(currentWifiIsCorrect) { /// if not first run, when app started with WiFi turned off
+
+            currentWifiIsCorrect = currentNetworkSSID.matches(wifiSSIDRegexp);
+            if(currentWifiIsCorrect) {
+                detectShortBreak();
+            }
+        }else {
+            if (currentWifiIsCorrect) { /// if not first run, when app started with WiFi turned off
                 saveYourData();
-                System.out.println("### Wifi disconnected : stopped ticker!");
                 currentWifiIsCorrect = false;
                 connectionStartTime = SystemClock.elapsedRealtime();
+                System.out.println("### Wifi disconnected : stopped ticker!");
             }
+        }
     }
 
     private void detectShortBreak(){
@@ -235,42 +239,25 @@ public class NetworkStateCheck extends Service {
 
     private void registerWifiChangeReceiver()
     {
-        BroadcastReceiver mWifiStateChangeReceiver = new BroadcastReceiver() {
+        BroadcastReceiver mWifiStateChangeReceiver =    new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (Objects.equals(intent.getAction(), WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+                if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
                     // Do your work.
-                    Toast.makeText(context, "Wifi state changed!", Toast.LENGTH_LONG).show();
-                    int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-                    switch (state) {
-                        case -1:
-                            System.out.println("### Value wasn't put with putExtra()!");
-                            break;
-                        case WifiManager.WIFI_STATE_DISABLING:
-                            System.out.println("### Disconnecting...");
-                            break;
-                        case WifiManager.WIFI_STATE_DISABLED:
-                            System.out.println("### Disconnected from WiFi!");
-                            break;
-                        case WifiManager.WIFI_STATE_ENABLING:
-                            System.out.println("### Connecting...");
-                            break;
-                        case WifiManager.WIFI_STATE_ENABLED:
-                            System.out.println("### Connected to WiFi!");
-                            break;
-                        case WifiManager.WIFI_STATE_UNKNOWN:
-                            System.out.println("### ### ### Unknown state!!!");
-                            break;
-                        default:
-                            System.out.println("### ### ### No, but seriously, this should never happen!");
-                    }
-                    startOrStopCounting(state);
+                    NetworkInfo nwInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                    startOrStopCounting(nwInfo.isConnected());
+
                 } else {
                     System.out.println("### ### ### HOW COULD THAT HAPPEN??? That's the only action I'm looking for!");
                 }
+
             }
         };
-        IntentFilter filter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         this.registerReceiver(mWifiStateChangeReceiver, filter);
+    }
+
+    private void displayNetworkInfo(){
+
     }
 }
