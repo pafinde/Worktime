@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ExpandableListView;
@@ -35,6 +36,8 @@ public class EntriesEditor extends AppCompatActivity {
     private float x1,x2;
     private long startClickTime;
 
+    private Context context = this;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +48,7 @@ public class EntriesEditor extends AppCompatActivity {
 
         prepareHashmap();
 
-        ExpandableListAdapter listAdapter = new ExpandableListAdapter(this, listDataHeader, listHash);
+        ExpandableListAdapter listAdapter = new ExpandableListAdapter(context, listDataHeader, listHash);
         listView.setAdapter(listAdapter);
     }
 /**
