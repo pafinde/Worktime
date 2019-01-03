@@ -1,4 +1,4 @@
-package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
+package com.example.mfind.timetracker;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;

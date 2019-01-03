@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
+package com.example.mfind.timetracker;
 
 import android.Manifest;
 import android.app.job.JobInfo;

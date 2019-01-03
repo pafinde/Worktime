@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
+package com.example.mfind.timetracker;
 
 import android.app.Service;
 import android.content.Context;
@@ -30,7 +30,7 @@ public class FileManipulationsApplicationInfo extends Service {
     private String APPLICATION_DATA_FILENAME = "ZPWT_ApplicationData.bin";
 
     boolean initialized = false;
-    ApplicationInfo.AppInfo.Builder appInfo = null;
+    SettingsProto.AppSettings.Builder appInfo = null;
 
     private Context context = null;
 
@@ -77,7 +77,7 @@ public class FileManipulationsApplicationInfo extends Service {
 
     /// used only when first launching the application
     private void prefillWithData(){
-        ApplicationInfo.AppInfo.Builder appInfo = ApplicationInfo.AppInfo.newBuilder();
+        SettingsProto.AppSettings.Builder appInfo = SettingsProto.AppSettings.newBuilder();
         appInfo.setSsid("AndroidWifi");
         appInfo.setMaxBreakTime(10 * 60);
         try {
@@ -88,8 +88,8 @@ public class FileManipulationsApplicationInfo extends Service {
         }
     }
 
-    private ApplicationInfo.AppInfo.Builder readDataFromMemory(){
-        ApplicationInfo.AppInfo.Builder appInfo = ApplicationInfo.AppInfo.newBuilder();
+    private SettingsProto.AppSettings.Builder readDataFromMemory(){
+        SettingsProto.AppSettings.Builder appInfo = SettingsProto.AppSettings.newBuilder();
         // Read the existing data file.
         try {
             appInfo.mergeFrom(context.openFileInput(APPLICATION_DATA_FILENAME));
@@ -109,7 +109,7 @@ public class FileManipulationsApplicationInfo extends Service {
         return appInfo;
     }
 
-    private void writeDataToMemory(ApplicationInfo.AppInfo data) throws IOException{
+    private void writeDataToMemory(SettingsProto.AppSettings data) throws IOException{
         data.writeTo(context.openFileOutput(APPLICATION_DATA_FILENAME, MODE_PRIVATE));
     }
 }

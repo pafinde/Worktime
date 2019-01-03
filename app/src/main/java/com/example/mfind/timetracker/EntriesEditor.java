@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
+package com.example.mfind.timetracker;
 
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
@@ -54,7 +54,7 @@ public class EntriesEditor extends AppCompatActivity {
     private void prepareHashmap(){ // works only if there are 12 unique months; there is no collision: Year1 Month1 <-> Year2 Month1
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         fm.setContext(getApplication());
-        WIFIConnectionTime.PersistentData wifiData = fm.getEntries();
+        TimeProto.TimeData wifiData = fm.getEntries();
 
         listDataHeader = new ArrayList<>();
         listHash = new HashMap<>();

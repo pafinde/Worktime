@@ -1,6 +1,6 @@
 /* Copyright 2018 Mateusz Findeisen */
 
-package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
+package com.example.mfind.timetracker;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

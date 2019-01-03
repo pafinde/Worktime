@@ -1,4 +1,4 @@
-package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
+package com.example.mfind.timetracker;
 
 import org.junit.Test;
 

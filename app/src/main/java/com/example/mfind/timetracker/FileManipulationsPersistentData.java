@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
+package com.example.mfind.timetracker;
 
 import android.app.Service;
 import android.content.Context;
@@ -24,7 +24,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.DateTimeException;
@@ -86,11 +85,11 @@ public class FileManipulationsPersistentData extends Service {
         System.out.println("### Adding seconds: " + secs);
 
         /// we are prefilling protos with empty days for protos continuity
-        WIFIConnectionTime.PersistentData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
+        TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
 
         /// now our day(0) is for sure the current one
-        WIFIConnectionTime.Day.Builder dayBuilder = WIFIConnectionTime.Day.newBuilder();
-        WIFIConnectionTime.Day day = wifiData.getDay(0);
+        TimeProto.Day.Builder dayBuilder = TimeProto.Day.newBuilder();
+        TimeProto.Day day = wifiData.getDay(0);
 
         int todayTicker;
 
@@ -111,7 +110,7 @@ public class FileManipulationsPersistentData extends Service {
     }
 
     public int findIndexByDate(int year, int month, int day){
-        WIFIConnectionTime.PersistentData wifiData = prependWithEmptyDays(readDataFromMemory()).build();
+        TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromMemory()).build();
         int i = 0;
         for(; i < wifiData.getDayCount(); i++){
             if(year == wifiData.getDay(i).getYear())
@@ -123,9 +122,9 @@ public class FileManipulationsPersistentData extends Service {
     }
 
     public void addEditEntry(int index, String comment, int seconds){
-        WIFIConnectionTime.PersistentData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
-        WIFIConnectionTime.Day.Builder day = WIFIConnectionTime.Day.newBuilder();
-        WIFIConnectionTime.Day.Edit.Builder edit = WIFIConnectionTime.Day.Edit.newBuilder();
+        TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
+        TimeProto.Day.Builder day = TimeProto.Day.newBuilder();
+        TimeProto.Day.Edit.Builder edit = TimeProto.Day.Edit.newBuilder();
 
         day = copyDay(day, wifiData.getDay(index));
 
@@ -144,13 +143,13 @@ public class FileManipulationsPersistentData extends Service {
         }
     }
 
-    private WIFIConnectionTime.Day.Builder copyDay(WIFIConnectionTime.Day.Builder that, WIFIConnectionTime.Day other){
+    private TimeProto.Day.Builder copyDay(TimeProto.Day.Builder that, TimeProto.Day other){
         that.setYear(other.getYear());
         that.setMonth(other.getMonth());
         that.setDay(other.getDay());
         that.setTickerSeconds(other.getTickerSeconds());
 
-        WIFIConnectionTime.Day.Edit.Builder edit = WIFIConnectionTime.Day.Edit.newBuilder();
+        TimeProto.Day.Edit.Builder edit = TimeProto.Day.Edit.newBuilder();
         for(int i = 0; i < other.getEditsCount(); i++){
             edit.setMinuteOfDay(other.getEdits(i).getMinuteOfDay());
             edit.setDeltaMinutes(other.getEdits(i).getDeltaMinutes());
@@ -160,18 +159,18 @@ public class FileManipulationsPersistentData extends Service {
         return that;
     }
 
-    public WIFIConnectionTime.PersistentData getEntries(){
+    public TimeProto.TimeData getEntries(){
         return prependWithEmptyDays(readDataFromMemory()).build();
     }
 
     /// prepends wifiData with empty days - easier to compute averages!
-    protected WIFIConnectionTime.PersistentData.Builder prependWithEmptyDays(WIFIConnectionTime.PersistentData.Builder wifiData){
-        WIFIConnectionTime.Day.Builder dayBuilder = WIFIConnectionTime.Day.newBuilder();
+    protected TimeProto.TimeData.Builder prependWithEmptyDays(TimeProto.TimeData.Builder wifiData){
+        TimeProto.Day.Builder dayBuilder = TimeProto.Day.newBuilder();
 
 
         for(int i = 0;; i++){
             LocalDate dayDate = LocalDate.now().minusDays(i);
-            WIFIConnectionTime.Day dayData = wifiData.getDay(i);
+            TimeProto.Day dayData = wifiData.getDay(i);
 
             LocalDate tempDate = LocalDate.of(dayData.getYear(), dayData.getMonth(), dayData.getDay());
 
@@ -194,7 +193,7 @@ public class FileManipulationsPersistentData extends Service {
     }
 
     // removes excess days - days above 91 required to compute all averages
-    private WIFIConnectionTime.PersistentData.Builder deleteExcessDays(WIFIConnectionTime.PersistentData.Builder wifiData){
+    private TimeProto.TimeData.Builder deleteExcessDays(TimeProto.TimeData.Builder wifiData){
         while(wifiData.getDayCount() > 91)
             wifiData.removeDay(91);
         return wifiData;
@@ -204,7 +203,7 @@ public class FileManipulationsPersistentData extends Service {
         if (valuesInitialized)
             return;
 
-        WIFIConnectionTime.PersistentData wifiData = prependWithEmptyDays(readDataFromMemory()).build();
+        TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromMemory()).build();
 
         average7 = average30 = average90 = 0;
         int notZeroDaysCount7 = 0, notZeroDaysCount30 = 0, notZeroDaysCount90 = 0;
@@ -215,7 +214,7 @@ public class FileManipulationsPersistentData extends Service {
         LocalDate localDate90DaysAgo = LocalDate.now().minusDays(90);
 
         for(int i = 1; i < wifiData.getDayCount(); i++){
-            WIFIConnectionTime.Day day = wifiData.getDay(i);
+            TimeProto.Day day = wifiData.getDay(i);
             int temp = day.getTickerSeconds() + inSeconds(day);
             if(temp != 0) {
                 LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
@@ -242,7 +241,7 @@ public class FileManipulationsPersistentData extends Service {
         valuesInitialized = true;
     }
 
-    public static int inSeconds(final WIFIConnectionTime.Day day){
+    public static int inSeconds(final TimeProto.Day day){
         int sum = 0;
         for(int j = 0; j < day.getEditsCount(); j++)
             sum += day.getEdits(j).getDeltaMinutes();
@@ -251,9 +250,9 @@ public class FileManipulationsPersistentData extends Service {
 
     /// used only when first launching the application
     private void prefillWithData(){
-        WIFIConnectionTime.PersistentData.Builder wifiConnectionTimeList = WIFIConnectionTime.PersistentData.newBuilder();
+        TimeProto.TimeData.Builder TimeProtoList = TimeProto.TimeData.newBuilder();
         for(int i = 0; i <= 90; i++){
-            WIFIConnectionTime.Day.Builder day = WIFIConnectionTime.Day.newBuilder();
+            TimeProto.Day.Builder day = TimeProto.Day.newBuilder();
             try {
                 LocalDate localDateMinusDays = LocalDate.now().minusDays(i+1);
                 day.setYear(localDateMinusDays.getYear());
@@ -264,27 +263,27 @@ public class FileManipulationsPersistentData extends Service {
                 System.out.println("### TIME WARP ERROR");
                 e.printStackTrace();
             }
-            wifiConnectionTimeList.addDay(day);
+            TimeProtoList.addDay(day);
         }
         try {
-            writeDataToMemory(wifiConnectionTimeList.build());
+            writeDataToMemory(TimeProtoList.build());
         } catch (IOException e) {
             System.out.println("### Output stream error.");
             e.printStackTrace();
         }
     }
 
-    protected WIFIConnectionTime.PersistentData.Builder readDataFromMemory(){
-        WIFIConnectionTime.PersistentData.Builder wifiConnectionTimeList = WIFIConnectionTime.PersistentData.newBuilder();
+    protected TimeProto.TimeData.Builder readDataFromMemory(){
+        TimeProto.TimeData.Builder TimeProtoList = TimeProto.TimeData.newBuilder();
         // Read the existing address book.
         try {
-            wifiConnectionTimeList.mergeFrom(context.openFileInput(CONNECTION_DATA_FILENAME));
+            TimeProtoList.mergeFrom(context.openFileInput(CONNECTION_DATA_FILENAME));
         } catch (FileNotFoundException e) {
             System.out.println("### " + CONNECTION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
             prefillWithData();
             try {
                 System.out.println("### You ARE merging, aren't you?");
-                wifiConnectionTimeList.mergeFrom(context.openFileInput(CONNECTION_DATA_FILENAME));
+                TimeProtoList.mergeFrom(context.openFileInput(CONNECTION_DATA_FILENAME));
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
@@ -292,10 +291,10 @@ public class FileManipulationsPersistentData extends Service {
             System.out.println("### Input stream error.");
             e.printStackTrace();
         }
-        return wifiConnectionTimeList;
+        return TimeProtoList;
     }
 
-    private void writeDataToMemory(WIFIConnectionTime.PersistentData data) throws IOException{
+    private void writeDataToMemory(TimeProto.TimeData data) throws IOException{
         data.writeTo(context.openFileOutput(CONNECTION_DATA_FILENAME, MODE_PRIVATE));
     }
 }

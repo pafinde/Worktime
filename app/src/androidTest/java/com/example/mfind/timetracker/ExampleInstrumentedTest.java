@@ -1,4 +1,4 @@
-package com.example.mfind.zpwtzerotouchpersonalwifitimetracker;
+package com.example.mfind.timetracker;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

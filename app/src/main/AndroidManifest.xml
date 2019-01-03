@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.mfind.zpwtzerotouchpersonalwifitimetracker">
+    package="com.example.mfind.timetracker">
 
     <uses-feature
         android:name="android.net.wifi.WifiManager"
@@ -28,7 +28,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.example.mfind.timetracker.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,11 +36,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".EntriesEditor"
-            android:parentActivityName=".MainActivity" />
+            android:name="com.example.mfind.timetracker.EntriesEditor"
+            android:parentActivityName="com.example.mfind.timetracker.MainActivity" />
 
         <service
-            android:name=".NetworkStateCheck"
+            android:name="com.example.mfind.timetracker.NetworkStateCheck"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -48,7 +48,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".FileManipulationsPersistentData"
+            android:name="com.example.mfind.timetracker.FileManipulationsPersistentData"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -58,13 +58,13 @@
             </intent-filter>
         </service>
         <service
-            android:name=".PeriodicalSave"
+            android:name="com.example.mfind.timetracker.PeriodicalSave"
             android:enabled="true"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
         <service
-            android:name=".FileManipulationsApplicationInfo"
+            android:name="com.example.mfind.timetracker.FileManipulationsApplicationInfo"
             android:enabled="true"
             android:exported="false"></service>
     </application>
