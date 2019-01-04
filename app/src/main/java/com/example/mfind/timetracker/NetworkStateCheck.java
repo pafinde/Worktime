@@ -19,6 +19,8 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 
+import java.time.LocalDateTime;
+
 import static java.lang.Thread.sleep;
 
 public class NetworkStateCheck extends Service {
@@ -30,6 +32,8 @@ public class NetworkStateCheck extends Service {
 
     private static final String CHANNEL_ID = "ZPWT notification - service is working";
     private long connectionStartTime;
+
+    private LocalDateTime startTime = null;
 
     private Context context;
 
@@ -110,11 +114,17 @@ public class NetworkStateCheck extends Service {
         super.onCreate();
         this.context = getApplicationContext();
 
+        startTime = LocalDateTime.now();
+
         connectionStartTime = 0;
         currentWifiIsCorrect = false;
         prepareAndStartForeground();
         readAppInfo();
         registerWifiChangeReceiver();
+    }
+
+    String getStartTime(){
+        return "Service start time: "+startTime;
     }
 
     private void readAppInfo(){

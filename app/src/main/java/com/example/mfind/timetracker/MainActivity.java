@@ -159,11 +159,18 @@ public class MainActivity extends AppCompatActivity {
                 long clickDuration = Calendar.getInstance().getTimeInMillis() - startClickTime;
                 x2 = event.getX();
                 float deltaX = x1 - x2;
-                if (Math.abs(deltaX) > MIN_DISTANCE && clickDuration < MAX_SWIPE_TIME)
+                if (deltaX > MIN_DISTANCE && clickDuration < MAX_SWIPE_TIME)
                 {
                     System.out.println("### Swiped right2left.");
 
                     Intent intent = new Intent(this, EntriesEditor.class);
+                    startActivity(intent);
+                }
+                if (deltaX < -MIN_DISTANCE && clickDuration < MAX_SWIPE_TIME)
+                {
+                    System.out.println("### Swiped left2right.");
+
+                    Intent intent = new Intent(this, DebugScreen.class);
                     startActivity(intent);
                 }
                 break;
