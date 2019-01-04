@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     NetworkStateCheck mServerReceiver;
     FileManipulationsPersistentData mServerFileManipulator;
 
-    private float x1, x2;
+    private float motionDownX;
     private long startClickTime;
     static final int MIN_DISTANCE = 150;
     static final int MAX_SWIPE_TIME = 200;
@@ -153,12 +153,11 @@ public class MainActivity extends AppCompatActivity {
         {
             case MotionEvent.ACTION_DOWN:
                 startClickTime = Calendar.getInstance().getTimeInMillis();
-                x1 = event.getX();
+                motionDownX = event.getX();
                 break;
             case MotionEvent.ACTION_UP:
                 long clickDuration = Calendar.getInstance().getTimeInMillis() - startClickTime;
-                x2 = event.getX();
-                float deltaX = x1 - x2;
+                float deltaX = motionDownX - event.getX();
                 if (deltaX > MIN_DISTANCE && clickDuration < MAX_SWIPE_TIME)
                 {
                     System.out.println("### Swiped right2left.");
