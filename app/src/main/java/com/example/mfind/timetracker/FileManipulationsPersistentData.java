@@ -83,7 +83,8 @@ public class FileManipulationsPersistentData extends Service {
     }
 
     int prependTicker(int secs){
-        System.out.println("### Adding seconds: " + secs);
+        if(secs != 0)
+            System.out.println("### Adding seconds: " + secs);
 
         /// we are prefilling protos with empty days for protos continuity
         TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());

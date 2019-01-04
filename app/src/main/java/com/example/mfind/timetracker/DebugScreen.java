@@ -1,5 +1,7 @@
 package com.example.mfind.timetracker;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
+import java.util.List;
+
+import static com.example.mfind.timetracker.MainActivity.changeSecondsToFormat;
 
 public class DebugScreen extends AppCompatActivity {
 
@@ -43,6 +47,12 @@ public class DebugScreen extends AppCompatActivity {
             TextView t;
             t = findViewById(R.id.serviceStartTime);
             t.setText(mServerReceiver.getStartTime());
+
+            t = findViewById(R.id.timeAgo);
+            t.setText("Updated " + changeSecondsToFormat(mServerReceiver.getLastUpdateDifference()) + " ago");
+
+            t = findViewById(R.id.lastValue);
+            t.setText("Last value was: " + changeSecondsToFormat(mServerReceiver.getLastSavedValue()));
         }
 
         @Override

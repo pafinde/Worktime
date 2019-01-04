@@ -41,6 +41,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -110,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
             NetworkStateCheck.LocalBinder mLocalBinder = (NetworkStateCheck.LocalBinder)service;
             mServerReceiver = mLocalBinder.getServerInstance();
             if(mBoundedFileManipulator){
-                mServerReceiver.saveYourData();
+                //mServerReceiver.saveYourData();
                 mServerFileManipulator.invalidateInitialization();
                 refreshValues();
             }
@@ -131,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
             mServerFileManipulator = mLocalBinder.getServerInstance();
             mServerFileManipulator.setContext(getApplicationContext());
             if(mBoundedReceiver){
-                mServerReceiver.saveYourData();
+                //mServerReceiver.saveYourData();
                 mServerFileManipulator.invalidateInitialization();
                 refreshValues();
             }
@@ -161,15 +163,11 @@ public class MainActivity extends AppCompatActivity {
                 float deltaX = x1 - x2;
                 if (deltaX > MIN_DISTANCE && clickDuration < MAX_SWIPE_TIME)
                 {
-                    System.out.println("### Swiped right2left.");
-
                     Intent intent = new Intent(this, EntriesEditor.class);
                     startActivity(intent);
                 }
                 if (deltaX < -MIN_DISTANCE && clickDuration < MAX_SWIPE_TIME)
                 {
-                    System.out.println("### Swiped left2right.");
-
                     Intent intent = new Intent(this, DebugScreen.class);
                     startActivity(intent);
                 }
@@ -179,20 +177,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void scheduleJob(){
-        ComponentName compName = new ComponentName(this, PeriodicalSave.class);
-        JobInfo.Builder info = new JobInfo.Builder(1, compName)
-            .setPeriodic(15 * 60 * 1000, 60 * 1000) // job is set to fire regularly every 15 minutes, with up to 5 minutes of fluctuation
-            .setPersisted(true);
-        if (Build.VERSION.SDK_INT >= 28)
-            info.setEstimatedNetworkBytes(0, 0);
-        info.build();
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        List<JobInfo> pendingJobs = jobScheduler.getAllPendingJobs();
+        if(pendingJobs.isEmpty()) {
 
-        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-        int resultCode = scheduler.schedule(info.build());
-        if(resultCode == JobScheduler.RESULT_SUCCESS)
-            System.out.println("### Job scheduled!");
-        else
-            System.out.println("### Job scheduler failure!");
+            ComponentName compName = new ComponentName(this, PeriodicalSave.class);
+            JobInfo.Builder info = new JobInfo.Builder(1, compName)
+                    .setPeriodic(15 * 60 * 1000, 60 * 1000) // job is set to fire regularly every 15 minutes, with up to 5 minutes of fluctuation
+                    .setPersisted(true);
+            //if (Build.VERSION.SDK_INT >= 28)
+            //    info.setImportantWhileForeground(true);
+            info.build();
+
+            JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+            int resultCode = scheduler.schedule(info.build());
+            if (resultCode == JobScheduler.RESULT_SUCCESS)
+                System.out.println("### Job scheduled! Starts now, doing this every approx. 15 minutes");
+            else
+                System.out.println("### Job scheduler failure!");
+        }
     }
 
     private void getServiceStartedIfNeeded(){
@@ -230,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         refreshValues();
     }
 
-    private String changeSecondsToFormat(long seconds){
+    static String changeSecondsToFormat(long seconds){
         return seconds/(60*60) + "h " + (seconds%(60*60))/60 + "min " + seconds%60 + "s";
     }
 

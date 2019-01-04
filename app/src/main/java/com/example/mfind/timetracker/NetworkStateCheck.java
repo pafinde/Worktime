@@ -57,6 +57,16 @@ public class NetworkStateCheck extends Service {
         return wifiSSIDRegexp;
     }
 
+    String getStartTime(){
+        return "Service start time: "+startTime;
+    }
+    long getLastUpdateDifference(){
+        return (SystemClock.elapsedRealtime() - connectionStartTime)/1000;
+    }
+    long getLastSavedValue(){
+        return saveData(0);
+    }
+
     public void setWifiSSIDRegexp(String ssid){
         wifiSSIDRegexp = ssid;
         currentWifiIsCorrect = wifiSSIDRegexp.equals(currentNetworkSSID);
@@ -72,6 +82,7 @@ public class NetworkStateCheck extends Service {
             int temp;
             temp = (int)(SystemClock.elapsedRealtime() - connectionStartTime)/1000;
             connectionStartTime = SystemClock.elapsedRealtime();
+            System.out.println("### Saving data! " + temp + "s");
             return saveData(temp);
         }
         return saveData(0);
@@ -79,7 +90,6 @@ public class NetworkStateCheck extends Service {
 
     private int saveData(int seconds){
         // gets todays ticker, increases it and returns current ticker
-        System.out.println("### Saving data! " + seconds + "s");
         doBindData();
         int temp = fmpd.prependTicker(seconds);
         //fmpd.invalidateInitialization();
@@ -121,10 +131,6 @@ public class NetworkStateCheck extends Service {
         prepareAndStartForeground();
         readAppInfo();
         registerWifiChangeReceiver();
-    }
-
-    String getStartTime(){
-        return "Service start time: "+startTime;
     }
 
     private void readAppInfo(){
