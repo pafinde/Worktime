@@ -18,12 +18,14 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import java.time.LocalDateTime;
 
 import static java.lang.Thread.sleep;
 
 public class NetworkStateCheck extends Service {
+    private static final String TAG = "NetworkStateCheck";
 
     private String wifiSSIDRegexp = "";
     private int maxBreakTime = 0;
@@ -81,12 +83,12 @@ public class NetworkStateCheck extends Service {
     }
 
     public int saveYourData(){
-        System.out.println("### Attempt to save!");
+        Log.i(TAG, "### saveYourData: Attempt to save!");
         if(currentWifiIsCorrect){
             int temp;
             temp = (int)(SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
             connectionCurrentTime = SystemClock.elapsedRealtime();
-            System.out.println("### Saving data! " + temp + "s");
+            Log.i(TAG, "### saveYourData: Saving data! " + temp + "s");
             return saveData(temp);
         }
         return saveData(0);
@@ -159,9 +161,9 @@ public class NetworkStateCheck extends Service {
                     .setContentIntent(pendingIntent);
             createNotificationChannel();
             startForeground(1337, notification.build());
-            System.out.println("### Foreground service started!");
+            Log.i(TAG, "### prepareAndStartForeground: Foreground service started!");
         }catch(SecurityException e){
-            System.out.println("### ### ### That... did not happen before...");
+            Log.e(TAG, "### ### ### prepareAndStartForeground: That... did not happen before...");
             e.printStackTrace();
         }
     }
@@ -186,7 +188,7 @@ public class NetworkStateCheck extends Service {
     public void onDestroy(){
         saveYourData();
         super.onDestroy();
-        System.out.println("### ### ### because we run in foreground, we should not ever be destroyed, unless in critical memory condition or when shutting down phone?");
+        Log.d(TAG, "### ### ### onDestroy: because we run in foreground, we should not ever be destroyed, unless in critical memory condition or when shutting down phone?");
         //unregisterReceiver(mWifiStateChangeReceiver);
         //mWifiStateChangeReceiver = null;
     }
@@ -195,7 +197,7 @@ public class NetworkStateCheck extends Service {
 
     @Override
     public void onLowMemory(){
-        System.out.println("### System is really low on memory!!! Syncing!!!");
+        Log.i(TAG, "### onLowMemory: Syncing!!!");
 
         saveYourData();
 
@@ -204,6 +206,10 @@ public class NetworkStateCheck extends Service {
 
     private void startOrStopCounting(Boolean type){
         if(type){
+            if(currentWifiIsCorrect){
+                Log.i(TAG, "### startOrStopCounting: repeated signal detected");
+                return;
+            }
             // e.g. To check the Network Name or other info:
             do{
                 currentNetworkSSID = ""; // emptying - might be needed
@@ -224,30 +230,33 @@ public class NetworkStateCheck extends Service {
                 }
 
                 currentNetworkSSID = currentNetworkSSID.replaceAll("^\"|\"$", "");
-                System.out.println(currentNetworkSSID);
             } while(currentNetworkSSID.equals("<unknown ssid>")); // to detect '<repeat if read was unsuccessful ssid>'
-            System.out.println("### Currently connected to " + currentNetworkSSID);
-
-            connectionStartTime = SystemClock.elapsedRealtime();
-            connectionCurrentTime = connectionStartTime;
+            Log.d(TAG, "### startOrStopCounting: Currently connected to " + currentNetworkSSID);
 
             currentWifiIsCorrect = currentNetworkSSID.matches(wifiSSIDRegexp);
             if(currentWifiIsCorrect) {
-                detectShortBreak();
+                if(!detectShortBreak())
+                    connectionStartTime = SystemClock.elapsedRealtime();
             }
+            
+            connectionCurrentTime = SystemClock.elapsedRealtime();
         }else {
             if (currentWifiIsCorrect) { /// if not first run, when app started with WiFi turned off
                 saveYourData();
                 currentWifiIsCorrect = false;
                 connectionCurrentTime = SystemClock.elapsedRealtime();
-                System.out.println("### Wifi disconnected : stopped ticker!");
+                Log.i(TAG, "### startOrStopCounting: Wifi disconnected : stopped ticker!");
             }
         }
     }
 
-    private void detectShortBreak(){
-        if(SystemClock.elapsedRealtime() - connectionCurrentTime <= maxBreakTime * 1000)
+    private Boolean detectShortBreak(){
+        if(SystemClock.elapsedRealtime() - connectionCurrentTime <= maxBreakTime * 1000){
+            Log.i(TAG, "### detectShortBreak: Saving...");
             saveYourData();
+            return true;
+        }
+        return false;
     }
 
     private void registerWifiChangeReceiver()
@@ -261,7 +270,7 @@ public class NetworkStateCheck extends Service {
                     startOrStopCounting(nwInfo.isConnected());
 
                 } else {
-                    System.out.println("### ### ### HOW COULD THAT HAPPEN??? That's the only action I'm looking for!");
+                    Log.d(TAG, "### ### ### onReceive: HOW COULD THAT HAPPEN??? That's the only action I'm looking for!");
                 }
 
             }

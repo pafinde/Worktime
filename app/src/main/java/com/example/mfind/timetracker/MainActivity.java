@@ -35,6 +35,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -42,8 +43,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
-
+//TODO change all to logd
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity";
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
@@ -144,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceDisconnected(ComponentName name) {
             mBoundedFileManipulator = false;
             mServerFileManipulator = null;
-            System.out.println("### I'm OFF FILEMA");
+            Log.w(TAG, "onServiceDisconnected: disconnected from FILEMA");
         }
     };
 
