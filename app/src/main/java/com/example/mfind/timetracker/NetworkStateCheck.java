@@ -31,6 +31,7 @@ public class NetworkStateCheck extends Service {
     private Boolean currentWifiIsCorrect = false;
 
     private static final String CHANNEL_ID = "ZPWT notification - service is working";
+    private long connectionCurrentTime;
     private long connectionStartTime;
 
     private LocalDateTime startTime = null;
@@ -61,10 +62,13 @@ public class NetworkStateCheck extends Service {
         return "Service start time: "+startTime;
     }
     long getLastUpdateDifference(){
-        return (SystemClock.elapsedRealtime() - connectionStartTime)/1000;
+        return (SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
     }
     long getLastSavedValue(){
         return saveData(0);
+    }
+    long getHowLongAgoWeConnectedToWifi(){
+        return (SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
     }
 
     public void setWifiSSIDRegexp(String ssid){
@@ -80,8 +84,8 @@ public class NetworkStateCheck extends Service {
         System.out.println("### Attempt to save!");
         if(currentWifiIsCorrect){
             int temp;
-            temp = (int)(SystemClock.elapsedRealtime() - connectionStartTime)/1000;
-            connectionStartTime = SystemClock.elapsedRealtime();
+            temp = (int)(SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
+            connectionCurrentTime = SystemClock.elapsedRealtime();
             System.out.println("### Saving data! " + temp + "s");
             return saveData(temp);
         }
@@ -126,6 +130,7 @@ public class NetworkStateCheck extends Service {
 
         startTime = LocalDateTime.now();
 
+        connectionCurrentTime = 0;
         connectionStartTime = 0;
         currentWifiIsCorrect = false;
         prepareAndStartForeground();
@@ -224,6 +229,7 @@ public class NetworkStateCheck extends Service {
             System.out.println("### Currently connected to " + currentNetworkSSID);
 
             connectionStartTime = SystemClock.elapsedRealtime();
+            connectionCurrentTime = connectionStartTime;
 
             currentWifiIsCorrect = currentNetworkSSID.matches(wifiSSIDRegexp);
             if(currentWifiIsCorrect) {
@@ -233,14 +239,14 @@ public class NetworkStateCheck extends Service {
             if (currentWifiIsCorrect) { /// if not first run, when app started with WiFi turned off
                 saveYourData();
                 currentWifiIsCorrect = false;
-                connectionStartTime = SystemClock.elapsedRealtime();
+                connectionCurrentTime = SystemClock.elapsedRealtime();
                 System.out.println("### Wifi disconnected : stopped ticker!");
             }
         }
     }
 
     private void detectShortBreak(){
-        if(SystemClock.elapsedRealtime() - connectionStartTime <= maxBreakTime * 1000)
+        if(SystemClock.elapsedRealtime() - connectionCurrentTime <= maxBreakTime * 1000)
             saveYourData();
     }
 

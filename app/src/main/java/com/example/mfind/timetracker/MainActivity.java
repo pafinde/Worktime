@@ -188,8 +188,7 @@ public class MainActivity extends AppCompatActivity {
             //    info.setImportantWhileForeground(true);
             info.build();
 
-            JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-            int resultCode = scheduler.schedule(info.build());
+            int resultCode = jobScheduler.schedule(info.build());
             if (resultCode == JobScheduler.RESULT_SUCCESS)
                 System.out.println("### Job scheduled! Starts now, doing this every approx. 15 minutes");
             else
