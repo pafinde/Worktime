@@ -22,6 +22,8 @@ import android.util.Log;
 
 import java.time.LocalDateTime;
 
+import javax.security.auth.login.LoginException;
+
 import static java.lang.Thread.sleep;
 
 public class NetworkStateCheck extends Service {
@@ -70,7 +72,7 @@ public class NetworkStateCheck extends Service {
         return saveData(0);
     }
     long getHowLongAgoWeConnectedToWifi(){
-        return (SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
+        return (SystemClock.elapsedRealtime() - connectionStartTime)/1000;
     }
 
     public void setWifiSSIDRegexp(String ssid){
@@ -235,8 +237,10 @@ public class NetworkStateCheck extends Service {
 
             currentWifiIsCorrect = currentNetworkSSID.matches(wifiSSIDRegexp);
             if(currentWifiIsCorrect) {
-                if(!detectShortBreak())
+                if(!detectShortBreak()) {
+                    Log.i(TAG, "### startOrStopCounting: wifi connected");
                     connectionStartTime = SystemClock.elapsedRealtime();
+                }
             }
 
             connectionCurrentTime = SystemClock.elapsedRealtime();
