@@ -6,24 +6,26 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
 import static java.lang.Thread.sleep;
 
 public class PeriodicalSave extends JobService {
+    private static final String TAG = "PeriodicalSave";
 
     boolean mBoundedReceiver = false;
     NetworkStateCheck mServerReceiver;
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        System.out.println("### Job started!");
+        Log.i(TAG, "### nStartJob: job started");
         doBackgroundWork(params);
         return true;
     }
 
     @Override
     public boolean onStopJob(JobParameters params) {
-        System.out.println("### Job cancelled.");
+        Log.i(TAG, "### onStopJob: job cancelled");
         return true;
     }
 
@@ -37,12 +39,12 @@ public class PeriodicalSave extends JobService {
 
                 while(!mBoundedReceiver){
                     try {
-                        System.out.println("### Sleep required! Sleeping...");
+                        Log.i(TAG, "### run: Sleep required! Sleeping...");
                         sleep(2 * 1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    System.out.println("### And still binding....");
+                    Log.i(TAG, "### run: And still binding....");
                 }
 
                 int i = mServerReceiver.saveYourData();

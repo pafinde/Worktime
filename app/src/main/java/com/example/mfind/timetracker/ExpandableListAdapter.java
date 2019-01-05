@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +41,8 @@ import java.util.Scanner;
 import static java.lang.Character.isDigit;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
+
+    private static final String TAG = "ExpandableListAdapter";
     private int entryindex;
 
     private Context context;
@@ -158,7 +161,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                         public void onClick(DialogInterface dialog, int which) {
                             String userInput = inputTime.getText().toString();
                             String userComment = inputComment.getText().toString();
-                            System.out.println("### Edited entry with " + userInput + " and comment: " + userComment);
+                            Log.i(TAG, "### onClick: Edited entry with " + userInput + " and comment: " + userComment);
                             enterAnEdit(entryindex, userComment, userInput);
                         }
                     });
@@ -193,7 +196,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         edit = edit.toUpperCase().replaceAll("[^PT0123456789\\-HM]", " ");
         for(int i = 1; i < edit.length()-1; i++){
             if(edit.charAt(i) == ' ' && isLastCharADigit(edit.substring(0, i)) && isFirstCharADigit(edit.substring(i+1))){
-                System.out.println("### User input error! at: " + i + " of: " + edit);
+                Log.i(TAG, "### enterAnEdit: User input error! at: " + i + " of: " + edit);
                 errorHandler();
                 return;
             }
@@ -201,12 +204,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         edit = edit.replaceAll("[ ]", "");
 
         if(edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
-            System.out.println("### User input error! First char is neither digit nor '-': " + edit);
+            Log.i(TAG, "### enterAnEdit: User input error! First char is neither digit nor '-': " + edit);
             errorHandler();
             return;
         }
         if(edit.charAt(0) == '-' && (edit.charAt(1) != 'P' || edit.charAt(2) != 'T')){
-            System.out.println("### User input error! '-' without \"PT\": " + edit);
+            Log.i(TAG, "### enterAnEdit: User input error! '-' without \"PT\": " + edit);
             errorHandler();
             return;
         }
@@ -215,15 +218,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         if(edit.charAt(0) != '-')
             toParse += "PT";
         toParse += edit;
-        System.out.println("### Current String: " + toParse);
+        Log.d(TAG, "### enterAnEdit: Current String: " + toParse);
 
         int minutes = 0;
         try {
             minutes = (int) Duration.parse(toParse).toMinutes();
         }catch(DateTimeParseException e){
-            System.out.println("### ### ### parse exception!");
+            Log.e(TAG, "### ### ### enterAnEdit: parse exception!");
         }
-        System.out.println("### EDIT: adding " + minutes + " minutes!");
+        Log.i(TAG, "### enterAnEdit: EDIT: adding " + minutes + " minutes!");
 
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         fm.setContext(context);

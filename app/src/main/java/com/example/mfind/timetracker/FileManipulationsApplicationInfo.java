@@ -22,11 +22,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class FileManipulationsApplicationInfo extends Service {
+    private static final String TAG = "FileManipulationsApplic";
     private String APPLICATION_DATA_FILENAME = "ZPWT_ApplicationData.bin";
 
     boolean initialized = false;
@@ -70,7 +72,7 @@ public class FileManipulationsApplicationInfo extends Service {
         try {
             writeDataToMemory(appInfo.build());
         } catch (IOException e) {
-            System.out.println("### Output stream error.");
+            Log.e(TAG, "### setSSID: Output stream error.");
             e.printStackTrace();
         }
     }
@@ -83,7 +85,7 @@ public class FileManipulationsApplicationInfo extends Service {
         try {
             writeDataToMemory(appInfo.build());
         } catch (IOException e) {
-            System.out.println("### Output stream error.");
+            Log.e(TAG, "### prefillWithData: Output stream error.");
             e.printStackTrace();
         }
     }
@@ -94,16 +96,16 @@ public class FileManipulationsApplicationInfo extends Service {
         try {
             appInfo.mergeFrom(context.openFileInput(APPLICATION_DATA_FILENAME));
         } catch (FileNotFoundException e) {
-            System.out.println("### " + APPLICATION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
+            Log.d(TAG, "### readDataFromMemory: " + APPLICATION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
             prefillWithData();
             try {
-                System.out.println("### You ARE merging, aren't you?");
+                Log.i(TAG, "### readDataFromMemory: merging");
                 appInfo.mergeFrom(context.openFileInput(APPLICATION_DATA_FILENAME));
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         } catch (IOException e) {
-            System.out.println("### Input stream error.");
+            Log.e(TAG, "### readDataFromMemory: Input stream error.");
             e.printStackTrace();
         }
         return appInfo;

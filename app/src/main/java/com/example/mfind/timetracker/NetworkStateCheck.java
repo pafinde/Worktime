@@ -238,7 +238,7 @@ public class NetworkStateCheck extends Service {
                 if(!detectShortBreak())
                     connectionStartTime = SystemClock.elapsedRealtime();
             }
-            
+
             connectionCurrentTime = SystemClock.elapsedRealtime();
         }else {
             if (currentWifiIsCorrect) { /// if not first run, when app started with WiFi turned off

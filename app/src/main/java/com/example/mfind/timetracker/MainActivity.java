@@ -193,9 +193,9 @@ public class MainActivity extends AppCompatActivity {
 
             int resultCode = jobScheduler.schedule(info.build());
             if (resultCode == JobScheduler.RESULT_SUCCESS)
-                System.out.println("### Job scheduled! Starts now, doing this every approx. 15 minutes");
+                Log.i(TAG, "### scheduleJob: Job starts now, doing this every approx. 15 minutes");
             else
-                System.out.println("### Job scheduler failure!");
+                Log.e(TAG, "### ### ### scheduleJob: failure!");
         }
     }
 
@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void refresh(View view){
-        System.out.println("### Clicked refresh.");
+        Log.i(TAG, "### refresh: clicked");
         mServerReceiver.saveYourData();
         mServerFileManipulator.invalidateInitialization();
         refreshValues();

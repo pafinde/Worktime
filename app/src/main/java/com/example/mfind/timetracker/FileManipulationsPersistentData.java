@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.FileNotFoundException;
@@ -32,6 +33,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class FileManipulationsPersistentData extends Service {
+
+    private static final String TAG = "FileManipulationsPersis";
+    
     private String CONNECTION_DATA_FILENAME = "ZPWT_WifiConnectionDataList.bin";
     protected int todayTicker;
     protected int average7;
@@ -84,7 +88,7 @@ public class FileManipulationsPersistentData extends Service {
 
     int prependTicker(int secs){
         if(secs != 0)
-            System.out.println("### Adding seconds: " + secs);
+            Log.i(TAG, "### prependTicker: adding seconds: " + secs);
 
         /// we are prefilling protos with empty days for protos continuity
         TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
@@ -105,7 +109,7 @@ public class FileManipulationsPersistentData extends Service {
         try {
             writeDataToMemory(wifiData.build());
         } catch (IOException e) {
-            System.out.println("### Output stream error.");
+            Log.d(TAG, "### ### ### prependTicker: output stream error!");
             e.printStackTrace();
         }
         return todayTicker;
@@ -140,7 +144,7 @@ public class FileManipulationsPersistentData extends Service {
         try {
             writeDataToMemory(wifiData.build());
         } catch (IOException e) {
-            System.out.println("### Output stream error.");
+            Log.d(TAG, "### ### ### addEditEntry: output stream error!");
             e.printStackTrace();
         }
     }
@@ -262,7 +266,7 @@ public class FileManipulationsPersistentData extends Service {
                 day.setDay(localDateMinusDays.getDayOfMonth());
                 day.setTickerSeconds(0);
             }catch(DateTimeException e){
-                System.out.println("### TIME WARP ERROR");
+                Log.e(TAG, "### prefillWithData: TIME WARP ERROR!");
                 e.printStackTrace();
             }
             TimeProtoList.addDay(day);
@@ -270,7 +274,7 @@ public class FileManipulationsPersistentData extends Service {
         try {
             writeDataToMemory(TimeProtoList.build());
         } catch (IOException e) {
-            System.out.println("### Output stream error.");
+            Log.d(TAG, "### ### ### prefillWithData: output stream error!");
             e.printStackTrace();
         }
     }
@@ -281,16 +285,16 @@ public class FileManipulationsPersistentData extends Service {
         try {
             TimeProtoList.mergeFrom(context.openFileInput(CONNECTION_DATA_FILENAME));
         } catch (FileNotFoundException e) {
-            System.out.println("### " + CONNECTION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
+            Log.d(TAG, "### readDataFromMemory: " + CONNECTION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
             prefillWithData();
             try {
-                System.out.println("### You ARE merging, aren't you?");
+                Log.i(TAG, "### readDataFromMemory: merging");
                 TimeProtoList.mergeFrom(context.openFileInput(CONNECTION_DATA_FILENAME));
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         } catch (IOException e) {
-            System.out.println("### Input stream error.");
+            Log.e(TAG, "### ### ### readDataFromMemory: input stream error!");
             e.printStackTrace();
         }
         return TimeProtoList;
