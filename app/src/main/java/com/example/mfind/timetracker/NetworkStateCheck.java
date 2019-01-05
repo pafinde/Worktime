@@ -47,17 +47,30 @@ public class NetworkStateCheck extends Service {
 
     IBinder mBinder = new LocalBinder();
 
+    /**
+     * when someone is binding to this class, we return out binder - our ~interface~ to talk with us
+     * @param intent - specified intent of the class that wants to bind to us, we could read this
+     *               intent and decide based on that if we actually want to give caller a binder
+     *               or not
+     * @return - returns a binder
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
+    /**
+     * Returns instance of out class when created
+     */
     class LocalBinder extends Binder {
         NetworkStateCheck getServerInstance() {
             return NetworkStateCheck.this;
         }
     }
 
+    /**
+     * @return - returns currently monitored wifi SSID regex
+     */
     public String getCurrentSSID(){
         return wifiSSIDRegexp;
     }
@@ -75,6 +88,10 @@ public class NetworkStateCheck extends Service {
         return (SystemClock.elapsedRealtime() - connectionStartTime)/1000;
     }
 
+    /**
+     * Sets new wifi SSID regex, saving data to proto if needed and afterwards
+     * @param ssid - new SSID regex
+     */
     public void setWifiSSIDRegexp(String ssid){
         wifiSSIDRegexp = ssid;
         currentWifiIsCorrect = wifiSSIDRegexp.equals(currentNetworkSSID);
@@ -84,6 +101,10 @@ public class NetworkStateCheck extends Service {
         doUnbindInfo();
     }
 
+    /**
+     * saves current ticker if possible
+     * @return - wither way, returns today ticker
+     */
     public int saveYourData(){
         Log.i(TAG, "### saveYourData: Attempt to save!");
         if(currentWifiIsCorrect){
@@ -96,6 +117,11 @@ public class NetworkStateCheck extends Service {
         return saveData(0);
     }
 
+    /**
+     * Used to actually save data
+     * @param seconds - number of seconds to prepend
+     * @return - returns today ticker
+     */
     private int saveData(int seconds){
         // gets todays ticker, increases it and returns current ticker
         doBindData();
@@ -105,6 +131,10 @@ public class NetworkStateCheck extends Service {
         return temp;
     }
 
+    /**
+     * Start FileManipulator Service (we cannot start more than one instance, we actually
+     * get already initialized instance when doing new() and startService()
+     */
     private void doBindData(){
         fmpd = new FileManipulationsPersistentData();
         final Intent serviceF = new Intent(context, FileManipulationsPersistentData.class);
@@ -112,10 +142,17 @@ public class NetworkStateCheck extends Service {
         fmpd.setContext(context);
     }
 
+    /**
+     * This stops the service.. unless someone is already binded to it (for example MainActivity)
+     */
     private void doUnbindData(){
         fmpd.stopSelf();
     }
 
+    /**
+     * Start ApplicationInfo Service (we cannot start more than one instance, we actually
+     * get already initialized instance when doing new() and startService()
+     */
     private void doBindInfo(){
         fmai = new FileManipulationsApplicationInfo();
         final Intent serviceF = new Intent(context, FileManipulationsApplicationInfo.class);
@@ -123,10 +160,21 @@ public class NetworkStateCheck extends Service {
         fmai.setContext(context);
     }
 
+    /**
+     * This stops the service.. unless someone is already binded to it
+     */
     private void doUnbindInfo(){
         fmai.stopSelf();
     }
 
+    /**
+     * Invoked when we get created
+     *
+     * This also registers this service as Foreground Service (and also creates
+     * permanent notification required for this)
+     *
+     * We also register BroadcastReceiver
+     */
     @Override
     public void onCreate(){
         super.onCreate();
@@ -142,6 +190,10 @@ public class NetworkStateCheck extends Service {
         registerWifiChangeReceiver();
     }
 
+    /**
+     * Reads already saved wifi SSID regex and currently saved max break time as saved in
+     * application memory
+     */
     private void readAppInfo(){
         doBindInfo();
         wifiSSIDRegexp = fmai.getSSID();
@@ -149,6 +201,10 @@ public class NetworkStateCheck extends Service {
         doUnbindInfo();
     }
 
+    /**
+     * Prepares permanent notification, and registers this service as foreground with
+     * created notification
+     */
     private void prepareAndStartForeground(){
         try {
             Intent notificationIntent = new Intent(context, MainActivity.class);
@@ -170,6 +226,9 @@ public class NetworkStateCheck extends Service {
         }
     }
 
+    /**
+     * Creates notification channel for permanent notification
+     */
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
@@ -186,6 +245,11 @@ public class NetworkStateCheck extends Service {
             }
         }
     }
+
+    /**
+     * Invoked when system for some reason kills our application, should probably never happen
+     * unless this service doesn't run in foreground
+     */
     @Override
     public void onDestroy(){
         saveYourData();
@@ -194,9 +258,11 @@ public class NetworkStateCheck extends Service {
         //unregisterReceiver(mWifiStateChangeReceiver);
         //mWifiStateChangeReceiver = null;
     }
-//**
 
-
+    /**
+     * Invoked when system is low on memory, we might not be able to save data in a second
+     * so we save it now if necessary
+     */
     @Override
     public void onLowMemory(){
         Log.i(TAG, "### onLowMemory: Syncing!!!");
@@ -206,6 +272,10 @@ public class NetworkStateCheck extends Service {
         super.onLowMemory();
     }
 
+    /**
+     * Starts, stops or ignores wifi change and starts or stops counting if necessary
+     * @param type - Boolean - true if currently connected to wifi, false if otherwise
+     */
     private void startOrStopCounting(Boolean type){
         if(type){
             if(currentWifiIsCorrect){
@@ -254,6 +324,10 @@ public class NetworkStateCheck extends Service {
         }
     }
 
+    /**
+     * Detects if wifi connection break was shorter than specified in application info proto
+     * @return - returns true if break was 'short', false otherwise
+     */
     private Boolean detectShortBreak(){
         if(SystemClock.elapsedRealtime() - connectionCurrentTime <= maxBreakTime * 1000){
             Log.i(TAG, "### detectShortBreak: Saving...");
@@ -263,9 +337,20 @@ public class NetworkStateCheck extends Service {
         return false;
     }
 
+    /**
+     * registers receiver to receive NETWORK_STATE_CHANGED_ACTION broadcast signal from system
+     */
     private void registerWifiChangeReceiver()
     {
-        BroadcastReceiver mWifiStateChangeReceiver =    new BroadcastReceiver() {
+        /**
+         * broadcast Receiver - used to detect network change
+         */
+        BroadcastReceiver mWifiStateChangeReceiver = new BroadcastReceiver() {
+            /**
+             * Invoked when someone broadcasted signal we are registered for
+             * @param context - application that send the broadcast
+             * @param intent - intent associated with the broadcast
+             */
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
@@ -281,9 +366,5 @@ public class NetworkStateCheck extends Service {
         };
         IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         this.registerReceiver(mWifiStateChangeReceiver, filter);
-    }
-
-    private void displayNetworkInfo(){
-
     }
 }

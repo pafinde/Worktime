@@ -26,6 +26,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.example.mfind.timetracker.MainActivity.changeSecondsToFormat;
+
+/**
+ * This class is in charge of preparing structure for ExpandableListAdapter (edit entries screen)
+ *
+ * Filling and management of ExpandableListAdapter is done in EntriesEditor
+ */
 public class EntriesEditor extends AppCompatActivity {
 
     private List<String> listDataHeader;
@@ -33,7 +40,13 @@ public class EntriesEditor extends AppCompatActivity {
 
     private Context context = this;
 
-
+    /**
+     * Invoked when this class gets created
+     *
+     * This prepares elements to be displayed on the screen and sends them to
+     * ExpandableListAdapter.class
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,10 +60,13 @@ public class EntriesEditor extends AppCompatActivity {
         listView.setAdapter(listAdapter);
     }
 
-    private String changeSecondsToFormat(long seconds){
-        return seconds/(60*60) + "h " + (seconds%(60*60))/60 + "min " + seconds%60 + "s";
-    }
-
+    /**
+     * Prepares hashmap - structure that holds all text later displayed
+     * and managed by ExpandableListView
+     *
+     * In details, this method gets all day entries and assigns every day a month
+     * that this day is in
+     */
     private void prepareHashmap(){ // works only if there are 12 unique months; there is no collision: Year1 Month1 <-> Year2 Month1
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         fm.setContext(getApplication());

@@ -32,6 +32,13 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+/**
+ * This class is used by MainActivity and BroadcastReceiver Service
+ * to get some values or update files in application persistent data proto.
+ *
+ * It's the only way of communicating with the actual class that does the operations on
+ * persistent data proto
+ */
 public class FileManipulationsPersistentData extends Service {
 
     private static final String TAG = "FileManipulationsPersis";
@@ -47,45 +54,88 @@ public class FileManipulationsPersistentData extends Service {
 
     IBinder mBinder = new LocalBinder();
 
+    /**
+     * when someone is binding to this class, we return out binder - our ~interface~ to talk with us
+     *
+     * @param intent - specified intent of the class that wants to bind to us, we could read this
+     *               intent and decide based on that if we actually want to give caller a binder
+     *               or not
+     * @return - returns a binder
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
+    /**
+     * Returns instance of out class when created
+     */
     class LocalBinder extends Binder {
         FileManipulationsPersistentData getServerInstance() {
             return FileManipulationsPersistentData.this;
         }
     }
 
+    /**
+     * Used by outside sources to give us possibility to write files for our application
+     *
+     * @param context - context of our application needed to access application files
+     */
     public void setContext(Context context) {
         this.context = context;
     }
 
+    /**
+     * invalidates already calculated values, so the next time someone asks for values we
+     * actively need to refresh them. This allows to later return true values while
+     * at the same time minimizing number of times that the calculation have to be done
+     */
     public void invalidateInitialization(){
         valuesInitialized = false;
     }
 
+    /**
+     * @return - returns number of seconds we spend connected to watched wifi today
+     */
     long getTodayTicker(){
         updateValuesForReading();
         return todayTicker;
     }
 
+    /**
+     * (Updates values if needed)
+     * @return - return average number of seconds spend connected from last 7 days
+     */
     long get7DayAverage(){
         updateValuesForReading();
         return average7;
     }
 
+    /**
+     * (Updates values if needed)
+     * @return - return average number of seconds spend connected from last 30 days
+     */
     long get30DayAverage(){
         updateValuesForReading();
         return average30;
     }
 
+    /**
+     * (Updates values if needed)
+     * @return - return average number of seconds spend connected from last 90 days
+     */
     long get90DayAverage(){
         updateValuesForReading();
         return average90;
     }
 
+    /**
+     * Used to add seconds to todays day, creating (prepending) it if needed
+     * (if day doesn't already exist)
+     *
+     * @param secs - number of seconds to prepend
+     * @return - returns today ticker
+     */
     int prependTicker(int secs){
         if(secs != 0)
             Log.i(TAG, "### prependTicker: adding seconds: " + secs);
@@ -115,6 +165,15 @@ public class FileManipulationsPersistentData extends Service {
         return todayTicker;
     }
 
+    /**
+     * Finds index of a day by a days: year value, month value and day value
+     *
+     * @param year - year value of the day you are looking for
+     * @param month - month value of the day you are looking for
+     * @param day - day value of the day you are looking for
+     * @return - returns index that should be used fast - in case of doing this close to midnight
+     * value might become inaccurate quite fast
+     */
     public int findIndexByDate(int year, int month, int day){
         TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromMemory()).build();
         int i = 0;
@@ -127,6 +186,14 @@ public class FileManipulationsPersistentData extends Service {
         return i >= wifiData.getDayCount() ? -1 : i;
     }
 
+    /**
+     * Adds an edit to an day entry specified with index, consisting of:
+     * comment and number of seconds (can be negative)
+     *
+     * @param index - index of the day to add edit to
+     * @param comment - comment
+     * @param seconds - number of seconds (can be negative)
+     */
     public void addEditEntry(int index, String comment, int seconds){
         TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
         TimeProto.Day.Builder day = TimeProto.Day.newBuilder();
@@ -149,6 +216,13 @@ public class FileManipulationsPersistentData extends Service {
         }
     }
 
+    /**
+     * Copies TimeProto.Day values (and edits) to TimeProto.Day.Builder, and returns it
+     *
+     * @param that - TimeProto.Day.Builder to copy other to
+     * @param other - other to copy to 'that' to
+     * @return - returns copied day
+     */
     private TimeProto.Day.Builder copyDay(TimeProto.Day.Builder that, TimeProto.Day other){
         that.setYear(other.getYear());
         that.setMonth(other.getMonth());
@@ -165,14 +239,22 @@ public class FileManipulationsPersistentData extends Service {
         return that;
     }
 
+    /**
+     * Returns list of entries in application memory
+     * @return - returns days with prepended empty days
+     */
     public TimeProto.TimeData getEntries(){
         return prependWithEmptyDays(readDataFromMemory()).build();
     }
 
-    /// prepends wifiData with empty days - easier to compute averages!
+    /**
+     * Prepends wifiData with empty days - is makes calculating averages easier
+     *
+     * @param wifiData - data to prepend some days to
+     * @return - returns wifiData with prepended days
+     */
     protected TimeProto.TimeData.Builder prependWithEmptyDays(TimeProto.TimeData.Builder wifiData){
         TimeProto.Day.Builder dayBuilder = TimeProto.Day.newBuilder();
-
 
         for(int i = 0;; i++){
             LocalDate dayDate = LocalDate.now().minusDays(i);
@@ -183,6 +265,7 @@ public class FileManipulationsPersistentData extends Service {
             if(dayDate.equals(tempDate))
                 break;
             if(dayDate.isBefore(tempDate)) { // this means that we changed timezone backwards (our current day is lower than it once was before)
+                // TODO NOT SAFE! We shoudl probably just leave this day as it is
                 int temp = dayData.getTickerSeconds() + inSeconds(dayData);
                 Toast.makeText(context, "Sorry, special case, removing newest day, deleted: " + temp + "s", Toast.LENGTH_LONG).show();
                 wifiData.removeDay(0);
@@ -198,13 +281,21 @@ public class FileManipulationsPersistentData extends Service {
         return deleteExcessDays(wifiData);
     }
 
-    // removes excess days - days above 91 required to compute all averages
+    /**
+     * Removes excess days - days above 91 are NOT required to calculate averages
+     *
+     * @param wifiData - Builder consisting of all days, with possibly some excess days
+     * @return - returns Builder without excess days
+     */
     private TimeProto.TimeData.Builder deleteExcessDays(TimeProto.TimeData.Builder wifiData){
         while(wifiData.getDayCount() > 91)
             wifiData.removeDay(91);
         return wifiData;
     }
 
+    /**
+     * Calculates all the averages and todayTicker if values are not already marked as correct
+     */
     protected void updateValuesForReading(){
         if (valuesInitialized)
             return;
@@ -247,6 +338,12 @@ public class FileManipulationsPersistentData extends Service {
         valuesInitialized = true;
     }
 
+    /**
+     * Calculates number of seconds from all of the edits from a given Day
+     *
+     * @param day - Day to calculate sum of ticker edits on
+     * @return - returns number of seconds
+     */
     public static int inSeconds(final TimeProto.Day day){
         int sum = 0;
         for(int j = 0; j < day.getEditsCount(); j++)
@@ -254,7 +351,11 @@ public class FileManipulationsPersistentData extends Service {
         return sum  * 60;
     }
 
-    /// used only when first launching the application
+    /**
+     * Used only when first launching the application
+     *
+     * Creates empty proto with 91 empty days in it
+     */
     private void prefillWithData(){
         TimeProto.TimeData.Builder TimeProtoList = TimeProto.TimeData.newBuilder();
         for(int i = 0; i <= 90; i++){
@@ -279,6 +380,11 @@ public class FileManipulationsPersistentData extends Service {
         }
     }
 
+    /**
+     * Reads TimeProto data from application memory
+     *
+     * @return - returns ready builder containing Days
+     */
     protected TimeProto.TimeData.Builder readDataFromMemory(){
         TimeProto.TimeData.Builder TimeProtoList = TimeProto.TimeData.newBuilder();
         // Read the existing address book.
@@ -300,6 +406,12 @@ public class FileManipulationsPersistentData extends Service {
         return TimeProtoList;
     }
 
+    /**
+     * Writes data to memory
+     *
+     * @param data - data to write (overwrite!)
+     * @throws IOException - when file couldn't be saved
+     */
     private void writeDataToMemory(TimeProto.TimeData data) throws IOException{
         data.writeTo(context.openFileOutput(CONNECTION_DATA_FILENAME, MODE_PRIVATE));
     }

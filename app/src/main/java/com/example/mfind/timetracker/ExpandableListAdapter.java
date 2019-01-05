@@ -40,6 +40,10 @@ import java.util.Scanner;
 
 import static java.lang.Character.isDigit;
 
+/**
+ * This is used to fill and manage entries as well as allows user to edit them
+ * by adding an edit and a comment to specified day
+ */
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
     private static final String TAG = "ExpandableListAdapter";
@@ -128,11 +132,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         if (view != null) {
             txtListChild = view.findViewById(R.id.lblListItem);
         }
-        if (txtListChild != null) {
-            txtListChild.setText(childText);
-        }
 
         if (txtListChild != null) {
+            txtListChild.setText(childText);
+
             txtListChild.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -146,7 +149,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                     layout.setOrientation(LinearLayout.VERTICAL);
 
                     final EditText inputTime = new EditText(context);
-                    inputTime.setHint("[-]PT%dh %dm");
+                    inputTime.setHint("[-PT][-]%dh [-]%dm");
                     layout.addView(inputTime); // Notice this is an add method
 
                     final EditText inputComment = new EditText(context);
@@ -180,18 +183,34 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return view;
     }
 
+    /**
+     * Finds element id using (sadly, I had no idea how to do this better) data actually saved in
+     * a child text
+     * @param v - view of clicked child
+     * @return - returns index of the day that this View is representing
+     */
     private int findIndexOfElemByView(View v){
         TextView text = v.findViewById(R.id.lblListItem);
         String withoutNumbers = ((String)text.getText()).replaceAll( "[/\\-hmins]", " " );
 
         Scanner s = new Scanner(withoutNumbers);
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        fm.setContext(context); // i dont know if this will work
+        fm.setContext(context);
         int mDay = s.nextInt();
         int mMonth = s.nextInt();
         int mYear = s.nextInt();
         return fm.findIndexByDate(mYear, mMonth, mDay);
     }
+
+    /**
+     * performs check on user input to check if user input qualifies to be an edit
+     * (comment is not(!) checked)
+     *
+     * If everything is correct, the edit is added to specified day (by index)
+     * @param index - index of day to add edit to
+     * @param comment - comment to add
+     * @param edit - USER INPUT - time to add
+     */
     private void enterAnEdit(int index, String comment, String edit){
         edit = edit.toUpperCase().replaceAll("[^PT0123456789\\-HM]", " ");
         for(int i = 1; i < edit.length()-1; i++){
@@ -209,13 +228,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             return;
         }
         if(edit.charAt(0) == '-' && (edit.charAt(1) != 'P' || edit.charAt(2) != 'T')){
-            Log.i(TAG, "### enterAnEdit: User input error! '-' without \"PT\": " + edit);
+            Log.i(TAG, "### enterAnEdit: User input error! '-' without 'PT': " + edit);
+            errorHandler();
+            return;
+        }
+        if(edit.charAt(0) == 'P' && edit.charAt(1) != 'T'){
+            Log.i(TAG, "### enterAnEdit: User input error! 'P' without 'T': " + edit);
             errorHandler();
             return;
         }
 
         String toParse = "";
-        if(edit.charAt(0) != '-')
+        if(edit.charAt(0) != '-' && !edit.substring(1,3).equals("PT"))
             toParse += "PT";
         toParse += edit;
         Log.d(TAG, "### enterAnEdit: Current String: " + toParse);
@@ -234,6 +258,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         fm.addEditEntry(index, comment, minutes);
     }
 
+    /**
+     * checks if last non-white character is a digit
+     * @param seq - String to check condition on
+     * @return - true if character is a digit, false otherwise
+     */
     private Boolean isLastCharADigit(String seq){
         for(int i = seq.length()-1; i >= 0; i--) {
             if (isDigit(seq.charAt(i)))
@@ -243,6 +272,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         }
         return false;
     }
+    /**
+     * checks if first non-white character is a digit
+     * @param seq - String to check condition on
+     * @return - true if character is a digit, false otherwise
+     */
     private Boolean isFirstCharADigit(String seq){
         for(int i = 0; i < seq.length(); i++) {
             if (isDigit(seq.charAt(i)))
@@ -253,6 +287,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         return false;
     }
 
+    /**
+     * Informs user that their input was incorrect
+     */
     private void errorHandler(){
         Toast.makeText(context, "Sorry, but your input hasn't met the criteria!", Toast.LENGTH_LONG).show();
     }

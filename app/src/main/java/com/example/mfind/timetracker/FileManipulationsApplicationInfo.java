@@ -27,6 +27,13 @@ import android.util.Log;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+/**
+ * This class is used by BroadcastReceiver Service
+ * to get some values or update files in application info proto.
+ *
+ * It's the only way of communicating with the actual class that does the operations on
+ * application info proto
+ */
 public class FileManipulationsApplicationInfo extends Service {
     private static final String TAG = "FileManipulationsApplic";
     private String APPLICATION_DATA_FILENAME = "ZPWT_ApplicationData.bin";
@@ -38,33 +45,59 @@ public class FileManipulationsApplicationInfo extends Service {
 
     IBinder mBinder = new LocalBinder();
 
+    /**
+     * when someone is binding to this class, we return out binder - our ~interface~ to talk with us
+     *
+     * @param intent - specified intent of the class that wants to bind to us, we could read this
+     *               intent and decide based on that if we actually want to give caller a binder
+     *               or not
+     * @return - returns a binder
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
+    /**
+     * Returns instance of out class when created
+     */
     class LocalBinder extends Binder {
         FileManipulationsApplicationInfo getServerInstance() {
             return FileManipulationsApplicationInfo.this;
         }
     }
 
+    /**
+     * Used by outside sources to give us possibility to write files for our application
+     *
+     * @param context - context of our application needed to access application files
+     */
     public void setContext(Context context) {
         this.context = context;
     }
 
+    /**
+     * @return - returns wifi ssid regex as saved in application memory
+     */
     public String getSSID(){
         if(!initialized)
             appInfo = readDataFromMemory();
         return appInfo.getSsid();
     }
 
+    /**
+     * @return - returns max break time as saved in application memory
+     */
     public int getMaxBreakTime(){
         if(!initialized)
             appInfo = readDataFromMemory();
         return appInfo.getMaxBreakTime();
     }
 
+    /**
+     * Used to set and save wifi ssid regex to application memory
+     * @param ssid - string containing wifi ssid regex
+     */
     public void setSSID(String ssid){
         if(!initialized)
             appInfo = readDataFromMemory();
@@ -77,7 +110,11 @@ public class FileManipulationsApplicationInfo extends Service {
         }
     }
 
-    /// used only when first launching the application
+    /**
+     * Used only when first launching the application
+     *
+     * Creates empty proto with default application values in it
+     */
     private void prefillWithData(){
         SettingsProto.AppSettings.Builder appInfo = SettingsProto.AppSettings.newBuilder();
         appInfo.setSsid("AndroidWifi");
@@ -90,6 +127,11 @@ public class FileManipulationsApplicationInfo extends Service {
         }
     }
 
+    /**
+     * Reads AppSetting data from application memory
+     *
+     * @return - returns ready builder containing AppSettings
+     */
     private SettingsProto.AppSettings.Builder readDataFromMemory(){
         SettingsProto.AppSettings.Builder appInfo = SettingsProto.AppSettings.newBuilder();
         // Read the existing data file.
@@ -111,6 +153,12 @@ public class FileManipulationsApplicationInfo extends Service {
         return appInfo;
     }
 
+    /**
+     * Writes data to memory
+     *
+     * @param data - data to write (overwrite!)
+     * @throws IOException - when file couldn't be saved
+     */
     private void writeDataToMemory(SettingsProto.AppSettings data) throws IOException{
         data.writeTo(context.openFileOutput(APPLICATION_DATA_FILENAME, MODE_PRIVATE));
     }

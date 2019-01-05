@@ -10,12 +10,24 @@ import android.util.Log;
 
 import static java.lang.Thread.sleep;
 
+/** TODO change this
+ * This class is periodically invoked by job scheduler.
+ *
+ * it handles periodical save by invoking saveYourData() in BroadcastReceiver Service
+ */
 public class PeriodicalSave extends JobService {
     private static final String TAG = "PeriodicalSave";
 
     boolean mBoundedReceiver = false;
     NetworkStateCheck mServerReceiver;
 
+    /**
+     * When Job scheduler runs our job, it actually starts this method
+     *
+     * @param params - parameters of the job, needed to finish it later
+     * @return - returns true when job needs to continue running,
+     * we are finishing it with jobFinished()
+     */
     @Override
     public boolean onStartJob(JobParameters params) {
         Log.i(TAG, "### nStartJob: job started");
@@ -23,12 +35,25 @@ public class PeriodicalSave extends JobService {
         return true;
     }
 
+    /**
+     * Called when something cancells our job.
+     * Job can be cancelled by app or system
+     *
+     * @param params - parameters of job
+     * @return - Returns true if we want system to reschedule our job
+     */
     @Override
     public boolean onStopJob(JobParameters params) {
         Log.i(TAG, "### onStopJob: job cancelled");
         return true;
     }
 
+    /**
+     * Background work here
+     *
+     * we bind to BroadcastReceiver Service there to invoke saveYourData()
+     * @param params - parameters of the job
+     */
     private void doBackgroundWork(final JobParameters params) {
         new Thread(new Runnable() {
             @Override
@@ -47,18 +72,21 @@ public class PeriodicalSave extends JobService {
                     Log.i(TAG, "### run: And still binding....");
                 }
 
-                int i = mServerReceiver.saveYourData();
+                mServerReceiver.saveYourData();
 
                 if(mBoundedReceiver) {
                     unbindService(mConnectionToReceiver);
                     mBoundedReceiver = false;
                 }
 
-                jobFinished(params, true);
+                jobFinished(params, false); // TODO was 'true'
             }
         }).start();
     }
 
+    /**
+     * Interface used for connection between this class (MainActivity) and BroadcastReceiver Service
+     */
     ServiceConnection mConnectionToReceiver = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
