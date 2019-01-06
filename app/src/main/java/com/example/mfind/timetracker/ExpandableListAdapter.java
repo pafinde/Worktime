@@ -69,7 +69,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
     @Override
     public int getChildrenCount(int i) {
-        return Objects.requireNonNull(listHashMap.get(listDataHeader.get(i))).size();
+        return listHashMap.get(listDataHeader.get(i)).size();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
     @Override
     public Object getChild(int i, int i1) {
-        return Objects.requireNonNull(listHashMap.get(listDataHeader.get(i))).get(i1); // i = Group Item , i1 = ChildItem
+        return listHashMap.get(listDataHeader.get(i)).get(i1); // i = Group Item , i1 = ChildItem
     }
 
     @Override
