@@ -37,6 +37,12 @@ public class DebugScreen extends AppCompatActivity {
         bindService(mIntentSR, mConnectionToReceiver, BIND_AUTO_CREATE);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(mConnectionToReceiver);
+    }
+
     ServiceConnection mConnectionToReceiver = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
