@@ -138,16 +138,16 @@ public class FileManipulationsApplicationInfo extends Service {
         try {
             appInfo.mergeFrom(context.openFileInput(APPLICATION_DATA_FILENAME));
         } catch (FileNotFoundException e) {
-            Log.d(TAG, "### readDataFromMemory: " + APPLICATION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
+            Log.d(TAG, "### readDataFromStorage: " + APPLICATION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
             prefillWithData();
             try {
-                Log.i(TAG, "### readDataFromMemory: merging");
+                Log.i(TAG, "### readDataFromStorage: merging");
                 appInfo.mergeFrom(context.openFileInput(APPLICATION_DATA_FILENAME));
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         } catch (IOException e) {
-            Log.e(TAG, "### readDataFromMemory: Input stream error.");
+            Log.e(TAG, "### readDataFromStorage: Input stream error.");
             e.printStackTrace();
         }
         return appInfo;
