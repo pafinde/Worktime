@@ -173,14 +173,13 @@ public class FileManipulationsPersistentData extends Service {
      */
     public int findIndexByDate(int year, int month, int day){
         TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromStorage()).build();
-        int i = 0;
-        for(; i < wifiData.getDayCount(); i++){
+        for(int i = 0; i < wifiData.getDayCount(); i++){
             if(year == wifiData.getDay(i).getYear())
                 if(month == wifiData.getDay(i).getMonth())
                     if(day == wifiData.getDay(i).getDay())
-                        break;
+                        return i;
         }
-        return i >= wifiData.getDayCount() ? -1 : i;
+        return -1;
     }
 
     /**
