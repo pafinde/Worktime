@@ -254,12 +254,19 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             errorHandler();
             return;
         }
-        Log.i(TAG, "### enterAnEdit: EDIT: adding " + minutes + " minutes!");
+        if(minutes == 0){
+            Toast.makeText(context, "Too little to add!", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         fm.setContext(context);
 
-        fm.addEditEntry(index, comment, minutes);
+        if(fm.addEditEntry(index, comment, minutes))
+            Log.i(TAG, "### enterAnEdit: EDIT: adding " + minutes + " minutes!");
+        else
+            Toast.makeText(context, "Adding this edit would make this day negative! Not adding!", Toast.LENGTH_LONG).show();
+
     }
 
     /**

@@ -192,17 +192,23 @@ public class FileManipulationsPersistentData extends Service {
      *
      * @param index - index of the day to add edit to
      * @param comment - comment
-     * @param seconds - number of seconds (can be negative)
+     * @param minutes - number of seconds (can be negative)
      */
-    public void addEditEntry(int index, String comment, int seconds){
+    public Boolean addEditEntry(int index, String comment, int minutes){
         TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
         TimeProto.Day.Builder day = TimeProto.Day.newBuilder();
         TimeProto.Day.Edit.Builder edit = TimeProto.Day.Edit.newBuilder();
 
         day = copyDay(day, wifiData.getDay(index));
 
+        int temp = day.getTickerSeconds() + inSeconds(day.build());
+        temp += minutes*60;
+        if(temp < 0){
+            return false;
+        }
+
         edit.setMinuteOfDay(LocalTime.now().getHour() * 60 + LocalTime.now().getMinute());
-        edit.setDeltaMinutes(seconds);
+        edit.setDeltaMinutes(minutes);
         edit.setComment(comment);
         day.addEdits(edit);
 
@@ -213,7 +219,9 @@ public class FileManipulationsPersistentData extends Service {
         } catch (IOException e) {
             Log.d(TAG, "### ### ### addEditEntry: output stream error!");
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     /**
@@ -313,7 +321,7 @@ public class FileManipulationsPersistentData extends Service {
         for(int i = 1; i < wifiData.getDayCount(); i++){
             TimeProto.Day day = wifiData.getDay(i);
             int temp = day.getTickerSeconds() + inSeconds(day);
-            if(temp != 0) {
+            if(temp > 60) {
                 LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
                 if(i <= 7 && !localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
                     average7 += temp;
