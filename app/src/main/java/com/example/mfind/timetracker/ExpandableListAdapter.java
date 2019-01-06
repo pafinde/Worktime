@@ -227,7 +227,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             errorHandler();
             return -1;
         }
-        if(edit.length() >= 3 && edit.charAt(0) == '-' && (edit.charAt(1) != 'P' || edit.charAt(2) != 'T')){
+        if(edit.startsWith("-") && !edit.startsWith("-PT")){
             Log.i(TAG, "### enterAnEdit: User input error! '-' without 'PT': " + edit);
             errorHandler();
             return -1;
