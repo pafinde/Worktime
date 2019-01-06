@@ -247,11 +247,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         if(edit.isEmpty())
             throw new ParseException("Empty string", 0);
 
-        edit = edit.toUpperCase().replaceAll("[^PT\\d\\-HM]", " ");
         if(edit.matches(".*\\d\\s+\\d.*")) {
             throw new ParseException("whitespace between digits", 0);
         }
         edit = edit.replaceAll("\\s", "");
+        edit = edit.toUpperCase();
+        if(edit.matches(".*[^PT\\d\\-HM].*")){
+            throw new ParseException("illegal character", 0);
+        }
 
         if(edit.length() >= 1 && edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
             throw new ParseException("First char is neither digit nor '-'", 0);
