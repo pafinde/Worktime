@@ -214,7 +214,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      * @param edit - USER INPUT - time to add
      */
     protected int enterAnEdit(int index, String comment, String edit){
-        edit = edit.toUpperCase().replaceAll("[^PT0123456789\\-HM]", " ");
+        edit = edit.toUpperCase().replaceAll("[^PT\\d\\-HM]", " ");
         if(edit.matches(".*\\d\\s+\\d.*")) {
             Log.i(TAG, "### enterAnEdit: User input error! whitespace between digits: " + edit);
             errorHandler();
