@@ -245,26 +245,24 @@ public class FileManipulationsPersistentData extends Service {
     protected TimeProto.TimeData.Builder prependWithEmptyDays(TimeProto.TimeData.Builder wifiData){
         TimeProto.Day.Builder dayBuilder = TimeProto.Day.newBuilder();
 
-        for(int i = 0;; i++){
-            LocalDate dayDate = LocalDate.now().minusDays(i);
-            TimeProto.Day dayData = wifiData.getDay(i);
-
-            LocalDate tempDate = LocalDate.of(dayData.getYear(), dayData.getMonth(), dayData.getDay());
-
-            if(dayDate.equals(tempDate))
-                break;
-            if(dayDate.isBefore(tempDate)) { // this means that we changed timezone backwards (our current day is lower than it once was before)
-                // TODO NOT SAFE! We should probably just leave this day as it is
-                int temp = dayData.getTickerSeconds() + editSeconds(dayData);
-                Toast.makeText(context, "Sorry, special case, removing newest day, deleted: " + temp + "s", Toast.LENGTH_LONG).show();
-                wifiData.removeDay(0);
-                continue;
+        LocalDate today = LocalDate.now();
+        while(true){
+            LocalDate nextDate;
+            if (wifiData.getDayCount() == 0) {
+                nextDate = today;
+            } else {
+                TimeProto.Day prevDay = wifiData.getDay(0);
+                LocalDate prevDate = LocalDate.of(prevDay.getYear(), prevDay.getMonth(), prevDay.getDay());
+                nextDate = prevDate.plusDays(1);
+                if (nextDate.isAfter(today)){
+                    break;
+                }
             }
-            dayBuilder.setYear(dayDate.getYear());
-            dayBuilder.setMonth(dayDate.getMonthValue());
-            dayBuilder.setDay(dayDate.getDayOfMonth());
+            dayBuilder.setYear(nextDate.getYear());
+            dayBuilder.setMonth(nextDate.getMonthValue());
+            dayBuilder.setDay(nextDate.getDayOfMonth());
             dayBuilder.setTickerSeconds(0);
-            wifiData.addDay(i, dayBuilder);
+            wifiData.addDay(0, dayBuilder);
         }
 
         return deleteExcessDays(wifiData);
@@ -355,23 +353,17 @@ public class FileManipulationsPersistentData extends Service {
      * Creates empty proto with 91 empty days in it
      */
     private void prefillWithData(){
-        TimeProto.TimeData.Builder TimeProtoList = TimeProto.TimeData.newBuilder();
-        for(int i = 0; i <= 90; i++){
-            TimeProto.Day.Builder day = TimeProto.Day.newBuilder();
-            try {
-                LocalDate localDateMinusDays = LocalDate.now().minusDays(i+1);
-                day.setYear(localDateMinusDays.getYear());
-                day.setMonth(localDateMinusDays.getMonthValue());
-                day.setDay(localDateMinusDays.getDayOfMonth());
-                day.setTickerSeconds(0);
-            }catch(DateTimeException e){
-                Log.e(TAG, "### prefillWithData: TIME WARP ERROR!");
-                e.printStackTrace();
-            }
-            TimeProtoList.addDay(day);
-        }
+        TimeProto.TimeData.Builder data = TimeProto.TimeData.newBuilder();
+        LocalDate oldestDate = LocalDate.now().minusDays(90);
+        TimeProto.Day.Builder oldestDay = TimeProto.Day.newBuilder();
+        oldestDay.setYear(oldestDate.getYear());
+        oldestDay.setMonth(oldestDate.getMonthValue());
+        oldestDay.setDay(oldestDate.getDayOfMonth());
+        oldestDay.setTickerSeconds(0);
+        data.addDay(oldestDay);
+        data = prependWithEmptyDays(data);
         try {
-            writeDataToStorage(TimeProtoList.build());
+            writeDataToStorage(data.build());
         } catch (IOException e) {
             Log.d(TAG, "### ### ### prefillWithData: output stream error!");
             e.printStackTrace();
