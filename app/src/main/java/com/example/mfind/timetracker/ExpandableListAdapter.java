@@ -215,14 +215,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      */
     protected int enterAnEdit(int index, String comment, String edit){
         edit = edit.toUpperCase().replaceAll("[^PT0123456789\\-HM]", " ");
-        for(int i = 1; i < edit.length()-1; i++){
-            if(edit.charAt(i) == ' ' && isLastCharADigit(edit.substring(0, i)) && isFirstCharADigit(edit.substring(i+1))){
-                Log.i(TAG, "### enterAnEdit: User input error! at: " + i + " of: " + edit);
-                errorHandler();
-                return -1;
-            }
+        if(edit.matches(".*\\d\\s+\\d.*")) {
+            Log.i(TAG, "### enterAnEdit: User input error! whitespace between digits: " + edit);
+            errorHandler();
+            return -1;
         }
-        edit = edit.replaceAll("[ ]", "");
+        edit = edit.replaceAll("\\s", "");
 
         if(edit.length() >= 1 && edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
             Log.i(TAG, "### enterAnEdit: User input error! First char is neither digit nor '-': " + edit);
@@ -231,11 +229,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         }
         if(edit.length() >= 3 && edit.charAt(0) == '-' && (edit.charAt(1) != 'P' || edit.charAt(2) != 'T')){
             Log.i(TAG, "### enterAnEdit: User input error! '-' without 'PT': " + edit);
-            errorHandler();
-            return -1;
-        }
-        if(edit.length() >= 2 && edit.charAt(0) == 'P' && edit.charAt(1) != 'T'){
-            Log.i(TAG, "### enterAnEdit: User input error! 'P' without 'T': " + edit);
             errorHandler();
             return -1;
         }
@@ -269,35 +262,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             Toast.makeText(context, "Adding this edit would make this day negative! Not adding!", Toast.LENGTH_LONG).show();
             return -1;
         }
-    }
-
-    /**
-     * checks if last non-white character is a digit
-     * @param seq - String to check condition on
-     * @return - true if character is a digit, false otherwise
-     */
-    protected static Boolean isLastCharADigit(String seq){
-        for(int i = seq.length()-1; i >= 0; i--) {
-            if (isDigit(seq.charAt(i)))
-                return true;
-            if (seq.charAt(i) != ' ')
-                return false;
-        }
-        return false;
-    }
-    /**
-     * checks if first non-white character is a digit
-     * @param seq - String to check condition on
-     * @return - true if character is a digit, false otherwise
-     */
-    protected static Boolean isFirstCharADigit(String seq){
-        for(int i = 0; i < seq.length(); i++) {
-            if (isDigit(seq.charAt(i)))
-                return true;
-            if (seq.charAt(i) != ' ')
-                return false;
-        }
-        return false;
     }
 
     /**
