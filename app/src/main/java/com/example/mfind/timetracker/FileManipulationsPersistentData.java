@@ -23,11 +23,9 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -140,7 +138,7 @@ public class FileManipulationsPersistentData extends Service {
             Log.i(TAG, "### prependTicker: adding seconds: " + secs);
 
         /// we are prefilling protos with empty days for protos continuity
-        TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromStorage());
+        TimeProto.TimeData.Builder wifiData = addRemoveDays(readDataFromStorage());
 
         /// now our day(0) is for sure the current one
         TimeProto.Day day = wifiData.getDay(0);
@@ -172,7 +170,7 @@ public class FileManipulationsPersistentData extends Service {
      * value might become inaccurate quite fast
      */
     public int findIndexByDate(int year, int month, int day){
-        TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromStorage()).build();
+        TimeProto.TimeData wifiData = addRemoveDays(readDataFromStorage()).build();
         for(int i = 0; i < wifiData.getDayCount(); i++){
             if(year == wifiData.getDay(i).getYear())
                 if(month == wifiData.getDay(i).getMonth())
@@ -191,7 +189,7 @@ public class FileManipulationsPersistentData extends Service {
      * @param minutes - number of seconds (can be negative)
      */
     public Boolean addEditEntry(int index, String comment, int minutes){
-        TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromStorage());
+        TimeProto.TimeData.Builder wifiData = addRemoveDays(readDataFromStorage());
         TimeProto.Day.Builder day = copyDay(wifiData.getDay(index));
         TimeProto.Day.Edit.Builder edit = TimeProto.Day.Edit.newBuilder();
 
@@ -233,19 +231,20 @@ public class FileManipulationsPersistentData extends Service {
      * @return - returns days with prepended empty days
      */
     public TimeProto.TimeData getEntries(){
-        return prependWithEmptyDays(readDataFromStorage()).build();
+        return addRemoveDays(readDataFromStorage()).build();
     }
 
     /**
-     * Prepends wifiData with empty days - is makes calculating averages easier
+     * Prepends wifiData with empty days, and removed old ones.
      *
      * @param wifiData - data to prepend some days to
      * @return - returns wifiData with prepended days
      */
-    protected TimeProto.TimeData.Builder prependWithEmptyDays(TimeProto.TimeData.Builder wifiData){
+    protected TimeProto.TimeData.Builder addRemoveDays(TimeProto.TimeData.Builder wifiData){
         TimeProto.Day.Builder dayBuilder = TimeProto.Day.newBuilder();
 
         LocalDate today = LocalDate.now();
+        // Add days in font, until today:
         while(true){
             LocalDate nextDate;
             if (wifiData.getDayCount() == 0) {
@@ -265,18 +264,10 @@ public class FileManipulationsPersistentData extends Service {
             wifiData.addDay(0, dayBuilder);
         }
 
-        return deleteExcessDays(wifiData);
-    }
-
-    /**
-     * Removes excess days - days above 91 are NOT required to calculate averages
-     *
-     * @param wifiData - Builder consisting of all days, with possibly some excess days
-     * @return - returns Builder without excess days
-     */
-    private TimeProto.TimeData.Builder deleteExcessDays(TimeProto.TimeData.Builder wifiData){
+        // Remove all days older than 90:
         while(wifiData.getDayCount() > 91)
             wifiData.removeDay(91);
+
         return wifiData;
     }
 
@@ -287,7 +278,7 @@ public class FileManipulationsPersistentData extends Service {
         if (valuesInitialized)
             return;
 
-        TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromStorage()).build();
+        TimeProto.TimeData wifiData = addRemoveDays(readDataFromStorage()).build();
         updateAverageValues(wifiData);
     }
 
@@ -361,7 +352,7 @@ public class FileManipulationsPersistentData extends Service {
         oldestDay.setDay(oldestDate.getDayOfMonth());
         oldestDay.setTickerSeconds(0);
         data.addDay(oldestDay);
-        data = prependWithEmptyDays(data);
+        data = addRemoveDays(data);
         try {
             writeDataToStorage(data.build());
         } catch (IOException e) {
