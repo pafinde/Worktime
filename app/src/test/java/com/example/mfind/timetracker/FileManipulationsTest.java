@@ -10,9 +10,7 @@ import static org.junit.Assert.assertNotEquals;
 class FileManipulationsForTesting extends FileManipulationsPersistentData {
 
     @Override
-    protected void updateValuesForReading(){
-        return;
-    }
+    protected void updateValuesForReading(){}
 
     protected void updateValuesForReading(TimeProto.TimeData wifiData){
         average7 = average30 = average90 = 0;
@@ -26,7 +24,7 @@ class FileManipulationsForTesting extends FileManipulationsPersistentData {
         for(int i = 1; i < wifiData.getDayCount(); i++){
             TimeProto.Day day = wifiData.getDay(i);
             int temp = day.getTickerSeconds() + inSeconds(day);
-            if(temp != 0) {
+            if(temp > 60) {
                 LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
                 if(i <= 7 && !localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
                     average7 += temp;
@@ -52,7 +50,7 @@ class FileManipulationsForTesting extends FileManipulationsPersistentData {
 
 public class FileManipulationsTest {
 
-    TimeProto.TimeData.Builder wifiData;
+    private TimeProto.TimeData.Builder wifiData;
 
     @Test public void get7DayAverageWhenNoDayHasTicker() {
         wifiData = TimeProto.TimeData.newBuilder();

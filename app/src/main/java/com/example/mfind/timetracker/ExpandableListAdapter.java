@@ -51,7 +51,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     private static final String TAG = "ExpandableListAdapter";
     private int entryindex;
 
-    private Context context;
+    protected Context context;
     private List<String> listDataHeader;
     private HashMap<String,List<String>> listHashMap;
 
@@ -213,7 +213,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      * @param comment - comment to add
      * @param edit - USER INPUT - time to add
      */
-    private int enterAnEdit(int index, String comment, String edit){
+    protected int enterAnEdit(int index, String comment, String edit){
         edit = edit.toUpperCase().replaceAll("[^PT0123456789\\-HM]", " ");
         for(int i = 1; i < edit.length()-1; i++){
             if(edit.charAt(i) == ' ' && isLastCharADigit(edit.substring(0, i)) && isFirstCharADigit(edit.substring(i+1))){
@@ -276,7 +276,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      * @param seq - String to check condition on
      * @return - true if character is a digit, false otherwise
      */
-    private Boolean isLastCharADigit(String seq){
+    protected static Boolean isLastCharADigit(String seq){
         for(int i = seq.length()-1; i >= 0; i--) {
             if (isDigit(seq.charAt(i)))
                 return true;
@@ -290,7 +290,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      * @param seq - String to check condition on
      * @return - true if character is a digit, false otherwise
      */
-    private Boolean isFirstCharADigit(String seq){
+    protected static Boolean isFirstCharADigit(String seq){
         for(int i = 0; i < seq.length(); i++) {
             if (isDigit(seq.charAt(i)))
                 return true;
