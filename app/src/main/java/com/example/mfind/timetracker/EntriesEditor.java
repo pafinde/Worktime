@@ -90,7 +90,7 @@ public class EntriesEditor extends AppCompatActivity {
                 listHash.put(listDataHeader.get(repetition), m[repetition]);
             }
             int sumOfSecs = wifiData.getDay(i).getTickerSeconds() + FileManipulationsPersistentData.inSeconds(wifiData.getDay(i));
-            m[repetition].add(wifiData.getDay(i).getDay() + "/" + tempMonth + "/" + wifiData.getDay(i).getYear() + "  -  " + changeSecondsToFormat(sumOfSecs));
+            m[repetition].add(wifiData.getDay(i).getDay() + "/" + tempMonth + "/" + wifiData.getDay(i).getYear() + "  ->  " + changeSecondsToFormat(sumOfSecs));
         }
     }
 }
