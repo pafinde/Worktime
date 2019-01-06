@@ -140,7 +140,7 @@ public class FileManipulationsPersistentData extends Service {
             Log.i(TAG, "### prependTicker: adding seconds: " + secs);
 
         /// we are prefilling protos with empty days for protos continuity
-        TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
+        TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromStorage());
 
         /// now our day(0) is for sure the current one
         TimeProto.Day day = wifiData.getDay(0);
@@ -154,7 +154,7 @@ public class FileManipulationsPersistentData extends Service {
         wifiData.setDay(0, dayBuilder);  // SET day - means replace
 
         try {
-            writeDataToMemory(wifiData.build());
+            writeDataToStorage(wifiData.build());
         } catch (IOException e) {
             Log.d(TAG, "### ### ### prependTicker: output stream error!");
             e.printStackTrace();
@@ -172,7 +172,7 @@ public class FileManipulationsPersistentData extends Service {
      * value might become inaccurate quite fast
      */
     public int findIndexByDate(int year, int month, int day){
-        TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromMemory()).build();
+        TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromStorage()).build();
         int i = 0;
         for(; i < wifiData.getDayCount(); i++){
             if(year == wifiData.getDay(i).getYear())
@@ -192,7 +192,7 @@ public class FileManipulationsPersistentData extends Service {
      * @param minutes - number of seconds (can be negative)
      */
     public Boolean addEditEntry(int index, String comment, int minutes){
-        TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
+        TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromStorage());
         TimeProto.Day.Builder day = copyDay(wifiData.getDay(index));
         TimeProto.Day.Edit.Builder edit = TimeProto.Day.Edit.newBuilder();
 
@@ -209,7 +209,7 @@ public class FileManipulationsPersistentData extends Service {
         wifiData.setDay(index, day);
 
         try {
-            writeDataToMemory(wifiData.build());
+            writeDataToStorage(wifiData.build());
         } catch (IOException e) {
             Log.d(TAG, "### ### ### addEditEntry: output stream error!");
             e.printStackTrace();
@@ -236,7 +236,7 @@ public class FileManipulationsPersistentData extends Service {
      * @return - returns days with prepended empty days
      */
     public TimeProto.TimeData getEntries(){
-        return prependWithEmptyDays(readDataFromMemory()).build();
+        return prependWithEmptyDays(readDataFromStorage()).build();
     }
 
     /**
@@ -292,7 +292,7 @@ public class FileManipulationsPersistentData extends Service {
         if (valuesInitialized)
             return;
 
-        TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromMemory()).build();
+        TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromStorage()).build();
         updateAverageValues(wifiData);
     }
 
@@ -374,7 +374,7 @@ public class FileManipulationsPersistentData extends Service {
             TimeProtoList.addDay(day);
         }
         try {
-            writeDataToMemory(TimeProtoList.build());
+            writeDataToStorage(TimeProtoList.build());
         } catch (IOException e) {
             Log.d(TAG, "### ### ### prefillWithData: output stream error!");
             e.printStackTrace();
@@ -382,38 +382,38 @@ public class FileManipulationsPersistentData extends Service {
     }
 
     /**
-     * Reads TimeProto data from application memory
+     * Reads TimeProto data from application storage
      *
      * @return - returns ready builder containing Days
      */
-    protected TimeProto.TimeData.Builder readDataFromMemory(){
+    protected TimeProto.TimeData.Builder readDataFromStorage(){
         TimeProto.TimeData.Builder TimeProtoList = TimeProto.TimeData.newBuilder();
         // Read the existing address book.
         try {
             TimeProtoList.mergeFrom(context.openFileInput(CONNECTION_DATA_FILENAME));
         } catch (FileNotFoundException e) {
-            Log.d(TAG, "### readDataFromMemory: " + CONNECTION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
+            Log.d(TAG, "### readDataFromStorage: " + CONNECTION_DATA_FILENAME + ": File not found.  Creating a new file and prefilling it with data.");
             prefillWithData();
             try {
-                Log.i(TAG, "### readDataFromMemory: merging");
+                Log.i(TAG, "### readDataFromStorage: merging");
                 TimeProtoList.mergeFrom(context.openFileInput(CONNECTION_DATA_FILENAME));
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         } catch (IOException e) {
-            Log.e(TAG, "### ### ### readDataFromMemory: input stream error!");
+            Log.e(TAG, "### ### ### readDataFromStorage: input stream error!");
             e.printStackTrace();
         }
         return TimeProtoList;
     }
 
     /**
-     * Writes data to memory
+     * Writes data to storage.
      *
      * @param data - data to write (overwrite!)
      * @throws IOException - when file couldn't be saved
      */
-    private void writeDataToMemory(TimeProto.TimeData data) throws IOException{
+    private void writeDataToStorage(TimeProto.TimeData data) throws IOException{
         data.writeTo(context.openFileOutput(CONNECTION_DATA_FILENAME, MODE_PRIVATE));
     }
 }
