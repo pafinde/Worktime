@@ -213,13 +213,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      * @param comment - comment to add
      * @param edit - USER INPUT - time to add
      */
-    private void enterAnEdit(int index, String comment, String edit){
+    private int enterAnEdit(int index, String comment, String edit){
         edit = edit.toUpperCase().replaceAll("[^PT0123456789\\-HM]", " ");
         for(int i = 1; i < edit.length()-1; i++){
             if(edit.charAt(i) == ' ' && isLastCharADigit(edit.substring(0, i)) && isFirstCharADigit(edit.substring(i+1))){
                 Log.i(TAG, "### enterAnEdit: User input error! at: " + i + " of: " + edit);
                 errorHandler();
-                return;
+                return -1;
             }
         }
         edit = edit.replaceAll("[ ]", "");
@@ -227,17 +227,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         if(edit.length() >= 1 && edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
             Log.i(TAG, "### enterAnEdit: User input error! First char is neither digit nor '-': " + edit);
             errorHandler();
-            return;
+            return -1;
         }
         if(edit.length() >= 3 && edit.charAt(0) == '-' && (edit.charAt(1) != 'P' || edit.charAt(2) != 'T')){
             Log.i(TAG, "### enterAnEdit: User input error! '-' without 'PT': " + edit);
             errorHandler();
-            return;
+            return -1;
         }
         if(edit.length() >= 2 && edit.charAt(0) == 'P' && edit.charAt(1) != 'T'){
             Log.i(TAG, "### enterAnEdit: User input error! 'P' without 'T': " + edit);
             errorHandler();
-            return;
+            return -1;
         }
 
         String toParse = "";
@@ -252,21 +252,23 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         }catch(DateTimeParseException e){
             Log.e(TAG, "### ### ### enterAnEdit: parse exception!");
             errorHandler();
-            return;
+            return -1;
         }
         if(minutes == 0){
             Toast.makeText(context, "Too little to add!", Toast.LENGTH_LONG).show();
-            return;
+            return 0;
         }
 
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         fm.setContext(context);
 
-        if(fm.addEditEntry(index, comment, minutes))
+        if(fm.addEditEntry(index, comment, minutes)) {
             Log.i(TAG, "### enterAnEdit: EDIT: adding " + minutes + " minutes!");
-        else
+            return minutes;
+        }else {
             Toast.makeText(context, "Adding this edit would make this day negative! Not adding!", Toast.LENGTH_LONG).show();
-
+            return -1;
+        }
     }
 
     /**
