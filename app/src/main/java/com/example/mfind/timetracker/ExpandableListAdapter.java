@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
+import javax.security.auth.login.LoginException;
+
 import static java.lang.Character.isDigit;
 
 /**
@@ -222,17 +224,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         }
         edit = edit.replaceAll("[ ]", "");
 
-        if(edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
+        if(edit.length() >= 1 && edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
             Log.i(TAG, "### enterAnEdit: User input error! First char is neither digit nor '-': " + edit);
             errorHandler();
             return;
         }
-        if(edit.charAt(0) == '-' && (edit.charAt(1) != 'P' || edit.charAt(2) != 'T')){
+        if(edit.length() >= 3 && edit.charAt(0) == '-' && (edit.charAt(1) != 'P' || edit.charAt(2) != 'T')){
             Log.i(TAG, "### enterAnEdit: User input error! '-' without 'PT': " + edit);
             errorHandler();
             return;
         }
-        if(edit.charAt(0) == 'P' && edit.charAt(1) != 'T'){
+        if(edit.length() >= 2 && edit.charAt(0) == 'P' && edit.charAt(1) != 'T'){
             Log.i(TAG, "### enterAnEdit: User input error! 'P' without 'T': " + edit);
             errorHandler();
             return;
