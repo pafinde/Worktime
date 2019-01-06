@@ -217,6 +217,11 @@ public class FileManipulationsPersistentData extends Service {
         return true;
     }
 
+    /**
+     * Copies TimeProto.Day values (and edits) to TimeProto.Day.Builder, and returns it
+     *
+     * @return - returns copied day
+     */
     private TimeProto.Day.Builder copyDay(TimeProto.Day message){
         TimeProto.Day.Builder builder = TimeProto.Day.newBuilder();
         builder.mergeFrom(message);
@@ -249,7 +254,7 @@ public class FileManipulationsPersistentData extends Service {
             if(dayDate.equals(tempDate))
                 break;
             if(dayDate.isBefore(tempDate)) { // this means that we changed timezone backwards (our current day is lower than it once was before)
-                // TODO NOT SAFE! We shoudl probably just leave this day as it is
+                // TODO NOT SAFE! We should probably just leave this day as it is
                 int temp = dayData.getTickerSeconds() + editSeconds(dayData);
                 Toast.makeText(context, "Sorry, special case, removing newest day, deleted: " + temp + "s", Toast.LENGTH_LONG).show();
                 wifiData.removeDay(0);
