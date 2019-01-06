@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -144,12 +143,10 @@ public class FileManipulationsPersistentData extends Service {
         TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
 
         /// now our day(0) is for sure the current one
-        TimeProto.Day.Builder dayBuilder = TimeProto.Day.newBuilder();
         TimeProto.Day day = wifiData.getDay(0);
+        TimeProto.Day.Builder dayBuilder = copyDay(day);
 
         int todayTicker;
-
-        dayBuilder = copyDay(dayBuilder, day);
 
         todayTicker = day.getTickerSeconds();
         todayTicker += secs;
@@ -196,13 +193,10 @@ public class FileManipulationsPersistentData extends Service {
      */
     public Boolean addEditEntry(int index, String comment, int minutes){
         TimeProto.TimeData.Builder wifiData = prependWithEmptyDays(readDataFromMemory());
-        TimeProto.Day.Builder day = TimeProto.Day.newBuilder();
+        TimeProto.Day.Builder day = copyDay(wifiData.getDay(index));
         TimeProto.Day.Edit.Builder edit = TimeProto.Day.Edit.newBuilder();
 
-        day = copyDay(day, wifiData.getDay(index));
-
-        int temp = day.getTickerSeconds() + inSeconds(day.build());
-        temp += minutes*60;
+        int temp = day.getTickerSeconds() + editSeconds(day.build()) + minutes * 60;
         if(temp < 0){
             return false;
         }
@@ -231,20 +225,10 @@ public class FileManipulationsPersistentData extends Service {
      * @param other - other to copy to 'that' to
      * @return - returns copied day
      */
-    private TimeProto.Day.Builder copyDay(TimeProto.Day.Builder that, TimeProto.Day other){
-        that.setYear(other.getYear());
-        that.setMonth(other.getMonth());
-        that.setDay(other.getDay());
-        that.setTickerSeconds(other.getTickerSeconds());
-
-        TimeProto.Day.Edit.Builder edit = TimeProto.Day.Edit.newBuilder();
-        for(int i = 0; i < other.getEditsCount(); i++){
-            edit.setMinuteOfDay(other.getEdits(i).getMinuteOfDay());
-            edit.setDeltaMinutes(other.getEdits(i).getDeltaMinutes());
-            edit.setComment(other.getEdits(i).getComment());
-            that.addEdits(edit);
-        }
-        return that;
+    private TimeProto.Day.Builder copyDay(TimeProto.Day message){
+        TimeProto.Day.Builder builder = TimeProto.Day.newBuilder();
+        builder.mergeFrom(message);
+        return builder;
     }
 
     /**
@@ -274,7 +258,7 @@ public class FileManipulationsPersistentData extends Service {
                 break;
             if(dayDate.isBefore(tempDate)) { // this means that we changed timezone backwards (our current day is lower than it once was before)
                 // TODO NOT SAFE! We shoudl probably just leave this day as it is
-                int temp = dayData.getTickerSeconds() + inSeconds(dayData);
+                int temp = dayData.getTickerSeconds() + editSeconds(dayData);
                 Toast.makeText(context, "Sorry, special case, removing newest day, deleted: " + temp + "s", Toast.LENGTH_LONG).show();
                 wifiData.removeDay(0);
                 continue;
@@ -318,26 +302,23 @@ public class FileManipulationsPersistentData extends Service {
     void updateAverageValues(TimeProto.TimeData wifiData){
         average7 = average30 = average90 = 0;
         int notZeroDaysCount7 = 0, notZeroDaysCount30 = 0, notZeroDaysCount90 = 0;
-        /// this is for detecting days that actually are after a gap in
-        /// PersistentData (should never happen, but checking anyways)
         LocalDate localDate7DaysAgo  = LocalDate.now().minusDays(7);
         LocalDate localDate30DaysAgo = LocalDate.now().minusDays(30);
         LocalDate localDate90DaysAgo = LocalDate.now().minusDays(90);
 
-        for(int i = 1; i < wifiData.getDayCount(); i++){
-            TimeProto.Day day = wifiData.getDay(i);
-            int temp = day.getTickerSeconds() + inSeconds(day);
-            if(temp > 60) {
+        for(TimeProto.Day day : wifiData.getDayList()){
+            int temp = day.getTickerSeconds() + editSeconds(day);
+            if(temp >= 60) { // days shorter tham 1m do not count towards average
                 LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
-                if(i <= 7 && !localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
+                if(!localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
                     average7 += temp;
                     notZeroDaysCount7++;
                 }
-                if(i <= 30 && !localDate30DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
+                if(!localDate30DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
                     average30 += temp;
                     notZeroDaysCount30++;
                 }
-                if(i <= 90 && !localDate90DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
+                if(!localDate90DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
                     average90 += temp;
                     notZeroDaysCount90++;
                 }
@@ -347,7 +328,7 @@ public class FileManipulationsPersistentData extends Service {
         average7  = (notZeroDaysCount7  != 0 ? (average7  / notZeroDaysCount7 ) : 0);
         average30 = (notZeroDaysCount30 != 0 ? (average30 / notZeroDaysCount30) : 0);
         average90 = (notZeroDaysCount90 != 0 ? (average90 / notZeroDaysCount90) : 0);
-        todayTicker = wifiData.getDayCount() != 0 ? wifiData.getDay(0).getTickerSeconds() + inSeconds(wifiData.getDay(0)) : 0;
+        todayTicker = wifiData.getDayCount() != 0 ? wifiData.getDay(0).getTickerSeconds() + editSeconds(wifiData.getDay(0)) : 0;
 
         valuesInitialized = true;
     }
@@ -358,11 +339,11 @@ public class FileManipulationsPersistentData extends Service {
      * @param day - Day to calculate sum of ticker edits on
      * @return - returns number of seconds
      */
-    public static int inSeconds(final TimeProto.Day day){
+    public static int editSeconds(final TimeProto.Day day){
         int sum = 0;
-        for(int j = 0; j < day.getEditsCount(); j++)
-            sum += day.getEdits(j).getDeltaMinutes();
-        return sum  * 60;
+        for(TimeProto.Day.Edit e : day.getEditsList())
+            sum += e.getDeltaMinutes();
+        return sum * 60;
     }
 
     /**
