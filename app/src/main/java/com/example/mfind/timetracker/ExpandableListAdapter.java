@@ -239,7 +239,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         }
 
         String toParse = "";
-        if(edit.charAt(0) != '-' && !edit.substring(1,3).equals("PT"))
+        if(edit.charAt(0) != '-' && edit.charAt(0) != 'P')
             toParse += "PT";
         toParse += edit;
         Log.d(TAG, "### enterAnEdit: Current String: " + toParse);
@@ -249,6 +249,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             minutes = (int) Duration.parse(toParse).toMinutes();
         }catch(DateTimeParseException e){
             Log.e(TAG, "### ### ### enterAnEdit: parse exception!");
+            errorHandler();
+            return;
         }
         Log.i(TAG, "### enterAnEdit: EDIT: adding " + minutes + " minutes!");
 
