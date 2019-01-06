@@ -308,7 +308,7 @@ public class FileManipulationsPersistentData extends Service {
 
         for(TimeProto.Day day : wifiData.getDayList()){
             int temp = day.getTickerSeconds() + editSeconds(day);
-            if(temp >= 60) { // days shorter tham 1m do not count towards average
+            if(temp >= 60) { // days shorter then 1m do not count towards average
                 LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
                 if(!localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
                     average7 += temp;
