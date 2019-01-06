@@ -218,13 +218,6 @@ public class FileManipulationsPersistentData extends Service {
         return true;
     }
 
-    /**
-     * Copies TimeProto.Day values (and edits) to TimeProto.Day.Builder, and returns it
-     *
-     * @param that - TimeProto.Day.Builder to copy other to
-     * @param other - other to copy to 'that' to
-     * @return - returns copied day
-     */
     private TimeProto.Day.Builder copyDay(TimeProto.Day message){
         TimeProto.Day.Builder builder = TimeProto.Day.newBuilder();
         builder.mergeFrom(message);
