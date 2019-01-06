@@ -221,8 +221,6 @@ public class FileManipulationsPersistentData extends Service {
     /**
      * Copies TimeProto.Day values (and edits) to TimeProto.Day.Builder, and returns it
      *
-     * @param that - TimeProto.Day.Builder to copy other to
-     * @param other - other to copy to 'that' to
      * @return - returns copied day
      */
     private TimeProto.Day.Builder copyDay(TimeProto.Day message){
@@ -257,7 +255,7 @@ public class FileManipulationsPersistentData extends Service {
             if(dayDate.equals(tempDate))
                 break;
             if(dayDate.isBefore(tempDate)) { // this means that we changed timezone backwards (our current day is lower than it once was before)
-                // TODO NOT SAFE! We shoudl probably just leave this day as it is
+                // TODO NOT SAFE! We should probably just leave this day as it is
                 int temp = dayData.getTickerSeconds() + editSeconds(dayData);
                 Toast.makeText(context, "Sorry, special case, removing newest day, deleted: " + temp + "s", Toast.LENGTH_LONG).show();
                 wifiData.removeDay(0);
@@ -302,26 +300,32 @@ public class FileManipulationsPersistentData extends Service {
     void updateAverageValues(TimeProto.TimeData wifiData){
         average7 = average30 = average90 = 0;
         int notZeroDaysCount7 = 0, notZeroDaysCount30 = 0, notZeroDaysCount90 = 0;
-        LocalDate localDate7DaysAgo  = LocalDate.now().minusDays(7);
-        LocalDate localDate30DaysAgo = LocalDate.now().minusDays(30);
-        LocalDate localDate90DaysAgo = LocalDate.now().minusDays(90);
+        LocalDate today = LocalDate.now();
+        LocalDate localDate7DaysAgo  = today.minusDays(7);
+        LocalDate localDate30DaysAgo = today.minusDays(30);
+        LocalDate localDate90DaysAgo = today.minusDays(90);
 
         for(TimeProto.Day day : wifiData.getDayList()){
             int temp = day.getTickerSeconds() + editSeconds(day);
-            if(temp >= 60) { // days shorter then 1m do not count towards average
-                LocalDate dateOfCurrentlyCheckingElement = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
-                if(!localDate7DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
-                    average7 += temp;
-                    notZeroDaysCount7++;
-                }
-                if(!localDate30DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
-                    average30 += temp;
-                    notZeroDaysCount30++;
-                }
-                if(!localDate90DaysAgo.isAfter(dateOfCurrentlyCheckingElement)){
-                    average90 += temp;
-                    notZeroDaysCount90++;
-                }
+            if(temp < 60) {
+                // days shorter tham 1m do not count towards average
+                continue;
+            }
+            LocalDate date = LocalDate.of(day.getYear(), day.getMonth(), day.getDay());
+            if(date.equals(today)) {
+                continue;
+            }
+            if(!localDate7DaysAgo.isAfter(date)){
+                average7 += temp;
+                notZeroDaysCount7++;
+            }
+            if(!localDate30DaysAgo.isAfter(date)){
+                average30 += temp;
+                notZeroDaysCount30++;
+            }
+            if(!localDate90DaysAgo.isAfter(date)){
+                average90 += temp;
+                notZeroDaysCount90++;
             }
         }
 

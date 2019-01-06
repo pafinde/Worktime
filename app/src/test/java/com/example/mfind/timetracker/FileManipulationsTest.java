@@ -11,45 +11,92 @@ public class FileManipulationsTest {
 
     private TimeProto.TimeData.Builder wifiData;
 
-    @Test public void get7DayAverageWhenNoDayHasTicker() {
+    @Test public void testEmptyValues() {
         wifiData = TimeProto.TimeData.newBuilder();
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         fm.updateAverageValues(wifiData.build());
         assertEquals(0, fm.get7DayAverage());
+        assertEquals(0, fm.get30DayAverage());
+        assertEquals(0, fm.get90DayAverage());
     }
-    @Test public void get7DayAverageWhenOnlyDay0HasTicker() {
+    @Test public void testOnlyDay0HasTicker() {
         wifiData = TimeProto.TimeData.newBuilder();
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         clearAndFillWithEmptyDays();
         addDay(0, 100);
         fm.updateAverageValues(wifiData.build());
         assertEquals(0, fm.get7DayAverage());
+        assertEquals(0, fm.get30DayAverage());
+        assertEquals(0, fm.get90DayAverage());
     }
-    @Test public void get7DayAverageWhenOnlyDay1HasTicker() {
+    @Test public void testDay1HasTicker() {
         wifiData = TimeProto.TimeData.newBuilder();
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         clearAndFillWithEmptyDays();
         addDay(1, 100);
         fm.updateAverageValues(wifiData.build());
         assertEquals(100, fm.get7DayAverage());
+        assertEquals(100, fm.get30DayAverage());
+        assertEquals(100, fm.get90DayAverage());
     }
-    @Test public void get7DayAverageWhenOnlyDay7HasTicker() {
+    @Test public void testDay7Bounday() {
         wifiData = TimeProto.TimeData.newBuilder();
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         clearAndFillWithEmptyDays();
         addDay(7, 100);
+        addDay(8, 200);
         fm.updateAverageValues(wifiData.build());
         assertEquals(100, fm.get7DayAverage());
     }
-    @Test public void get7DayAverageWhenOnlyDay8HasTicker() {
+    @Test public void testDay30Boundary() {
+        wifiData = TimeProto.TimeData.newBuilder();
+        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
+        clearAndFillWithEmptyDays();
+        addDay(30, 100);
+        addDay(31, 200);
+        fm.updateAverageValues(wifiData.build());
+        assertEquals(100, fm.get30DayAverage());
+    }
+    @Test public void testDay90Boundary() {
+        wifiData = TimeProto.TimeData.newBuilder();
+        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
+        clearAndFillWithEmptyDays();
+        addDay(90, 100);
+        addDay(91, 200);
+        fm.updateAverageValues(wifiData.build());
+        assertEquals(100, fm.get90DayAverage());
+    }
+    @Test public void testDay8HasTicker() {
         wifiData = TimeProto.TimeData.newBuilder();
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         clearAndFillWithEmptyDays();
         addDay(8, 100);
         fm.updateAverageValues(wifiData.build());
         assertEquals(0, fm.get7DayAverage());
+        assertEquals(100, fm.get30DayAverage());
+        assertEquals(100, fm.get90DayAverage());
     }
-    @Test public void get7DayAverageGeneralGroupTesting() {
+    @Test public void testDay31HasTicker() {
+        wifiData = TimeProto.TimeData.newBuilder();
+        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
+        clearAndFillWithEmptyDays();
+        addDay(31, 100);
+        fm.updateAverageValues(wifiData.build());
+        assertEquals(0, fm.get7DayAverage());
+        assertEquals(0, fm.get30DayAverage());
+        assertEquals(100, fm.get90DayAverage());
+    }
+    @Test public void testDay91HasTicker() {
+        wifiData = TimeProto.TimeData.newBuilder();
+        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
+        clearAndFillWithEmptyDays();
+        addDay(91, 100);
+        fm.updateAverageValues(wifiData.build());
+        assertEquals(0, fm.get7DayAverage());
+        assertEquals(0, fm.get30DayAverage());
+        assertEquals(0, fm.get90DayAverage());
+    }
+    @Test public void test7DayAverageGeneralGroupTesting() {
         wifiData = TimeProto.TimeData.newBuilder();
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
         clearAndFillWithEmptyDays();
@@ -71,45 +118,7 @@ public class FileManipulationsTest {
         assertEquals(300, fm.get7DayAverage());
     }
 
-    @Test public void get30DayAverageWhenNoDayHasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(0, fm.get30DayAverage());
-    }
-    @Test public void get30DayAverageWhenOnlyDay0HasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        clearAndFillWithEmptyDays();
-        addDay(0, 100);
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(0, fm.get30DayAverage());
-    }
-    @Test public void get30DayAverageWhenOnlyDay1HasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        clearAndFillWithEmptyDays();
-        addDay(1, 100);
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(100, fm.get30DayAverage());
-    }
-    @Test public void get30DayAverageWhenOnlyDay30HasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        clearAndFillWithEmptyDays();
-        addDay(30, 100);
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(100, fm.get30DayAverage());
-    }
-    @Test public void get30DayAverageWhenOnlyDay31HasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        clearAndFillWithEmptyDays();
-        addDay(31, 100);
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(0, fm.get30DayAverage());
-    }
-    @Test public void get30DayAverageGeneralGroupTesting() {
+    @Test public void test30DayAverageGeneralGroupTesting() {
         wifiData = TimeProto.TimeData.newBuilder();
 
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
@@ -141,45 +150,7 @@ public class FileManipulationsTest {
         assertEquals(600, fm.get30DayAverage());
     }
 
-    @Test public void get90DayAverageWhenNoDayHasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(0, fm.get90DayAverage());
-    }
-    @Test public void get90DayAverageWhenOnlyDay0HasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        clearAndFillWithEmptyDays();
-        addDay(0, 100);
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(0, fm.get90DayAverage());
-    }
-    @Test public void get90DayAverageWhenOnlyDay1HasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        clearAndFillWithEmptyDays();
-        addDay(1, 100);
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(100, fm.get90DayAverage());
-    }
-    @Test public void get90DayAverageWhenOnlyDay90HasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        clearAndFillWithEmptyDays();
-        addDay(90, 100);
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(100, fm.get90DayAverage());
-    }
-    @Test public void get90DayAverageWhenOnlyDay91HasTicker() {
-        wifiData = TimeProto.TimeData.newBuilder();
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        clearAndFillWithEmptyDays();
-        addDay(91, 100);
-        fm.updateAverageValues(wifiData.build());
-        assertEquals(0, fm.get90DayAverage());
-    }
-    @Test public void get90DayAverageGeneralGroupTesting() {
+    @Test public void test90DayAverageGeneralGroupTesting() {
         wifiData = TimeProto.TimeData.newBuilder();
 
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
@@ -221,7 +192,7 @@ public class FileManipulationsTest {
         assertEquals(1100, fm.get90DayAverage());
     }
 
-    @Test public void getGeneralDayAverageGeneralGroupTesting() {
+    @Test public void testGeneralDayAverageGeneralGroupTesting() {
         wifiData = TimeProto.TimeData.newBuilder();
 
         FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
