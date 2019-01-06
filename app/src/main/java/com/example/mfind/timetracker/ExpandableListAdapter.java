@@ -31,6 +31,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.ParseException;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
@@ -213,55 +214,66 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      * @param comment - comment to add
      * @param edit - USER INPUT - time to add
      */
-    protected int enterAnEdit(int index, String comment, String edit){
+    private void enterAnEdit(int index, String comment, String edit){
+        int minutes;
+        try {
+            minutes = parseUserInput(edit);
+        } catch (ParseException | NullPointerException e) {
+            Log.e(TAG, "### ### ### parse or nullpointer exception!");
+            errorHandler();
+            return;
+        }
+
+        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
+        fm.setContext(context);
+
+        if(fm.addEditEntry(index, comment, minutes))
+            Log.i(TAG, "### enterAnEdit: EDIT: adding " + minutes + " minutes!");
+        else
+            Toast.makeText(context, "Adding this edit would make this day negative! Not adding!", Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * parses user input to number of minutes (can be negative)
+     *
+     * @param edit - String containing user input [-PT][-]%dH%dM
+     * @return - returns number of minutes as parsed from user input
+     * @throws ParseException - when there is an general error
+     * @throws NullPointerException - if String is null
+     */
+    static int parseUserInput(String edit) throws ParseException, NullPointerException {
+        if(edit == null)
+            throw new NullPointerException();
+        if(edit.isEmpty())
+            throw new ParseException("Empty string", 0);
+
         edit = edit.toUpperCase().replaceAll("[^PT\\d\\-HM]", " ");
         if(edit.matches(".*\\d\\s+\\d.*")) {
-            Log.i(TAG, "### enterAnEdit: User input error! whitespace between digits: " + edit);
-            errorHandler();
-            return -1;
+            throw new ParseException("whitespace between digits", 0);
         }
         edit = edit.replaceAll("\\s", "");
 
         if(edit.length() >= 1 && edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
-            Log.i(TAG, "### enterAnEdit: User input error! First char is neither digit nor '-': " + edit);
-            errorHandler();
-            return -1;
+            throw new ParseException("First char is neither digit nor '-'", 0);
         }
         if(edit.startsWith("-") && !edit.startsWith("-PT")){
-            Log.i(TAG, "### enterAnEdit: User input error! '-' without 'PT': " + edit);
-            errorHandler();
-            return -1;
+            throw new ParseException("'-' without 'PT'", 0);
         }
 
         String toParse = "";
         if(edit.charAt(0) != '-' && edit.charAt(0) != 'P')
             toParse += "PT";
         toParse += edit;
-        Log.d(TAG, "### enterAnEdit: Current String: " + toParse);
 
-        int minutes = 0;
+        int minutes;
         try {
             minutes = (int) Duration.parse(toParse).toMinutes();
         }catch(DateTimeParseException e){
-            Log.e(TAG, "### ### ### enterAnEdit: parse exception!");
-            errorHandler();
-            return -1;
-        }
-        if(minutes == 0){
-            Toast.makeText(context, "Too little to add!", Toast.LENGTH_LONG).show();
-            return 0;
+            System.out.println("### ### ### enterAnEdit: parse exception!");
+            throw new ParseException("parse exception!", 0);
         }
 
-        FileManipulationsPersistentData fm = new FileManipulationsPersistentData();
-        fm.setContext(context);
-
-        if(fm.addEditEntry(index, comment, minutes)) {
-            Log.i(TAG, "### enterAnEdit: EDIT: adding " + minutes + " minutes!");
-            return minutes;
-        }else {
-            Toast.makeText(context, "Adding this edit would make this day negative! Not adding!", Toast.LENGTH_LONG).show();
-            return -1;
-        }
+        return minutes;
     }
 
     /**

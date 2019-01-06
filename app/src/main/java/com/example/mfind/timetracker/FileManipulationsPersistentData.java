@@ -98,7 +98,7 @@ public class FileManipulationsPersistentData extends Service {
      * @return - returns number of seconds we spend connected to watched wifi today
      */
     long getTodayTicker(){
-        updateValuesForReading();
+        updateValuesForReadingIfNecessary();
         return todayTicker;
     }
 
@@ -107,7 +107,7 @@ public class FileManipulationsPersistentData extends Service {
      * @return - return average number of seconds spend connected from last 7 days
      */
     long get7DayAverage(){
-        updateValuesForReading();
+        updateValuesForReadingIfNecessary();
         return average7;
     }
 
@@ -116,7 +116,7 @@ public class FileManipulationsPersistentData extends Service {
      * @return - return average number of seconds spend connected from last 30 days
      */
     long get30DayAverage(){
-        updateValuesForReading();
+        updateValuesForReadingIfNecessary();
         return average30;
     }
 
@@ -125,7 +125,7 @@ public class FileManipulationsPersistentData extends Service {
      * @return - return average number of seconds spend connected from last 90 days
      */
     long get90DayAverage(){
-        updateValuesForReading();
+        updateValuesForReadingIfNecessary();
         return average90;
     }
 
@@ -302,14 +302,20 @@ public class FileManipulationsPersistentData extends Service {
     }
 
     /**
-     * Calculates all the averages and todayTicker if values are not already marked as correct
+     * Runs updateAverageValues if necessary
      */
-    protected void updateValuesForReading(){
+    protected void updateValuesForReadingIfNecessary(){
         if (valuesInitialized)
             return;
 
         TimeProto.TimeData wifiData = prependWithEmptyDays(readDataFromMemory()).build();
+        updateAverageValues(wifiData);
+    }
 
+    /**
+     * Calculates all the averages and todayTicker
+     */
+    void updateAverageValues(TimeProto.TimeData wifiData){
         average7 = average30 = average90 = 0;
         int notZeroDaysCount7 = 0, notZeroDaysCount30 = 0, notZeroDaysCount90 = 0;
         /// this is for detecting days that actually are after a gap in
@@ -341,7 +347,7 @@ public class FileManipulationsPersistentData extends Service {
         average7  = (notZeroDaysCount7  != 0 ? (average7  / notZeroDaysCount7 ) : 0);
         average30 = (notZeroDaysCount30 != 0 ? (average30 / notZeroDaysCount30) : 0);
         average90 = (notZeroDaysCount90 != 0 ? (average90 / notZeroDaysCount90) : 0);
-        todayTicker = wifiData.getDay(0).getTickerSeconds() + inSeconds(wifiData.getDay(0));
+        todayTicker = wifiData.getDayCount() != 0 ? wifiData.getDay(0).getTickerSeconds() + inSeconds(wifiData.getDay(0)) : 0;
 
         valuesInitialized = true;
     }
