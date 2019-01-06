@@ -55,7 +55,7 @@ public class DebugScreen extends AppCompatActivity {
             t.setText("Last value was: " + changeSecondsToFormat(mServerReceiver.getLastSavedValue()));
 
             t = findViewById(R.id.connectedToWifiFor);
-            t.setText("We are connected to wifi for " + changeSecondsToFormat(mServerReceiver.getHowLongAgoWeConnectedToWifi()));
+            t.setText("We are connected to wifi for " + mServerReceiver.getHowLongAgoWeConnectedToWifi());
 
         }
 

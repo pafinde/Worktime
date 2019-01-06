@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 
 import javax.security.auth.login.LoginException;
 
+import static com.example.mfind.timetracker.MainActivity.changeSecondsToFormat;
 import static java.lang.Thread.sleep;
 
 public class NetworkStateCheck extends Service {
@@ -84,8 +85,11 @@ public class NetworkStateCheck extends Service {
     long getLastSavedValue(){
         return saveData(0);
     }
-    long getHowLongAgoWeConnectedToWifi(){
-        return (SystemClock.elapsedRealtime() - connectionStartTime)/1000;
+    String getHowLongAgoWeConnectedToWifi(){
+        if(currentWifiIsCorrect)
+            return changeSecondsToFormat((SystemClock.elapsedRealtime() - connectionStartTime)/1000);
+        else
+            return "-NOT-STARTED-";
     }
 
     /**
