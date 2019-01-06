@@ -239,24 +239,21 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      * @param edit - String containing user input [-PT][-]%dH%dM
      * @return - returns number of minutes as parsed from user input
      * @throws ParseException - when there is an general error
-     * @throws NullPointerException - if String is null
      */
-    static int parseUserInput(String edit) throws ParseException, NullPointerException {
-        if(edit == null)
-            throw new NullPointerException();
-        if(edit.isEmpty())
-            throw new ParseException("Empty string", 0);
-
+    static int parseUserInput(String edit) throws ParseException {
         if(edit.matches(".*\\d\\s+\\d.*")) {
             throw new ParseException("whitespace between digits", 0);
         }
-        edit = edit.replaceAll("\\s", "");
         edit = edit.toUpperCase();
+        edit = edit.replaceAll("\\s", "");
+        if(edit.isEmpty()) {
+            throw new ParseException("Empty string", 0);
+        }
         if(edit.matches(".*[^PT\\d\\-HM].*")){
             throw new ParseException("illegal character", 0);
         }
 
-        if(edit.length() >= 1 && edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
+        if(edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
             throw new ParseException("First char is neither digit nor '-'", 0);
         }
         if(edit.startsWith("-") && !edit.startsWith("-PT")){
