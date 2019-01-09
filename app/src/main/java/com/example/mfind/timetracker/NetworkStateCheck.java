@@ -76,6 +76,15 @@ public class NetworkStateCheck extends Service {
         return wifiSSIDRegexp;
     }
 
+    /**
+     * @return - returns number of seconds not yet saved to application data
+     */
+    long getNotSavedTime(){
+        if(currentWifiIsCorrect)
+            return (SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
+        return 0;
+    }
+
     String getStartTime(){
         return "Service start time: "+startTime;
     }

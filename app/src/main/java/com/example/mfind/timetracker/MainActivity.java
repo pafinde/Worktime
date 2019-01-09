@@ -34,6 +34,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.LoginFilter;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,6 +43,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 /**
  * MainActivity is the main screen we can see when launching app for the first time.
@@ -54,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+
+    boolean inForeground = false;
 
     boolean mBoundedReceiver, mBoundedFileManipulator;
     NetworkStateCheck mServerReceiver;
@@ -96,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
      * 2 services we are using, and that we actually scheduled a job
      */
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         Intent mIntentSR = new Intent(this, NetworkStateCheck.class);
         bindService(mIntentSR, mConnectionToReceiver, BIND_AUTO_CREATE);
@@ -104,6 +109,20 @@ public class MainActivity extends AppCompatActivity {
         bindService(mIntentFM, mConnectionToFileManipulator, BIND_AUTO_CREATE);
 
         scheduleJob();
+    }
+
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        inForeground = true;
+        setupAndRunRefresher();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        inForeground = false;
     }
 
     /**
@@ -123,6 +142,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * runs Thread in background when applications MainActivity is on screen
+     * and every second refreshes values on screen as main UIThread
+     */
+    private void setupAndRunRefresher(){
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while (!this.isInterrupted() && inForeground) {
+                        Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                refreshValues();
+                                Log.i(TAG, "### run: ....");
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "### run: MainActivity is hidden");
+                }
+            }
+        }.start();
+    }
+
+    /**
      * Used to refresh all fields in activity_main with currently calculated values.
      *
      * The fields we are updating are:
@@ -134,7 +179,9 @@ public class MainActivity extends AppCompatActivity {
     private void refreshValues(){
         TextView t;
         t = findViewById(R.id.todayTicker);
-        t.setText(changeSecondsToFormat(mServerFileManipulator.getTodayTicker()));
+        long todaySeconds = mServerFileManipulator.getTodayTicker();
+        todaySeconds += mServerReceiver.getNotSavedTime();
+        t.setText(changeSecondsToFormat(todaySeconds));
         t = findViewById(R.id.average7Data);
         t.setText(changeSecondsToFormat(mServerFileManipulator.get7DayAverage()));
         t = findViewById(R.id.average30Data);
@@ -152,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             NetworkStateCheck.LocalBinder mLocalBinder = (NetworkStateCheck.LocalBinder)service;
             mServerReceiver = mLocalBinder.getServerInstance();
             if(mBoundedFileManipulator){
-                //mServerReceiver.saveYourData();
+                mServerReceiver.saveYourData();
                 mServerFileManipulator.invalidateInitialization();
                 refreshValues();
             }
@@ -176,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
             mServerFileManipulator = mLocalBinder.getServerInstance();
             mServerFileManipulator.setContext(getApplicationContext());
             if(mBoundedReceiver){
-                //mServerReceiver.saveYourData();
+                mServerReceiver.saveYourData();
                 mServerFileManipulator.invalidateInitialization();
                 refreshValues();
             }

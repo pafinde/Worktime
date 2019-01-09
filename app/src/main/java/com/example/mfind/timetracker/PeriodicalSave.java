@@ -79,7 +79,7 @@ public class PeriodicalSave extends JobService {
                     mBoundedReceiver = false;
                 }
 
-                jobFinished(params, false); // TODO was 'true'
+                jobFinished(params, false);
             }
         }).start();
     }
