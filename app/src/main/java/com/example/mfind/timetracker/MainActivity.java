@@ -239,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
                     .setPersisted(true);
             //if (Build.VERSION.SDK_INT >= 28)
             //    info.setImportantWhileForeground(true);
-            info.build();
 
             int resultCode = jobScheduler.schedule(info.build());
             if (resultCode == JobScheduler.RESULT_SUCCESS)
