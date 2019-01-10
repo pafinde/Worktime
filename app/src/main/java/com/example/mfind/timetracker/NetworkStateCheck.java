@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 
 import javax.security.auth.login.LoginException;
 
+import static android.content.Intent.ACTION_BATTERY_LOW;
 import static com.example.mfind.timetracker.MainActivity.changeSecondsToFormat;
 import static java.lang.Thread.sleep;
 
@@ -366,11 +367,14 @@ public class NetworkStateCheck extends Service {
              */
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
+                String action = intent.getAction();
+                if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                     // Do your work.
                     NetworkInfo nwInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                     startOrStopCounting(nwInfo.isConnected());
 
+                } else if(ACTION_BATTERY_LOW.equals(action)){
+                    saveYourData();
                 } else {
                     Log.d(TAG, "### ### ### onReceive: HOW COULD THAT HAPPEN??? That's the only action I'm looking for!");
                 }
@@ -378,6 +382,7 @@ public class NetworkStateCheck extends Service {
             }
         };
         IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(ACTION_BATTERY_LOW);
         this.registerReceiver(mWifiStateChangeReceiver, filter);
     }
 }
