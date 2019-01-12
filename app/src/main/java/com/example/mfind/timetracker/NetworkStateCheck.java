@@ -372,9 +372,6 @@ public class NetworkStateCheck extends Service {
                     // Do your work.
                     NetworkInfo nwInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                     startOrStopCounting(nwInfo.isConnected());
-
-                } else if(ACTION_BATTERY_LOW.equals(action)){
-                    saveYourData();
                 } else {
                     Log.d(TAG, "### ### ### onReceive: HOW COULD THAT HAPPEN??? That's the only action I'm looking for!");
                 }
@@ -382,7 +379,6 @@ public class NetworkStateCheck extends Service {
             }
         };
         IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        filter.addAction(ACTION_BATTERY_LOW);
         this.registerReceiver(mWifiStateChangeReceiver, filter);
     }
 }
