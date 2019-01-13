@@ -119,16 +119,16 @@ public class NetworkStateCheck extends Service {
      */
     public int saveYourData(){
         Log.i(TAG, "### saveYourData: Attempt to save!");
+
+        doBindInfo();
+        fmai.setLastSaveTime((int)SystemClock.elapsedRealtime()/1000);
+        doUnbindInfo();
+
         if(currentWifiIsCorrect){
             int temp;
             temp = (int)(SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
             connectionCurrentTime = SystemClock.elapsedRealtime();
             Log.i(TAG, "### saveYourData: Saving data! " + temp + "s");
-
-            doBindInfo();
-            fmai.setLastSaveTime((int)SystemClock.elapsedRealtime()/1000);
-            doUnbindInfo();
-
             return saveData(temp);
         }
         return saveData(0);
