@@ -8,4 +8,5 @@ option java_outer_classname = "SettingsProto";
 message AppSettings {
   optional string ssid = 1;
   optional int32 max_break_time = 2;
+  optional int32 last_save_time = 3;
 }
