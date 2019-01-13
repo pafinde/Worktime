@@ -39,7 +39,7 @@ public class FileManipulationsApplicationInfo extends Service {
     private String APPLICATION_DATA_FILENAME = "ZPWT_ApplicationData.bin";
 
     boolean initialized = false;
-    SettingsProto.AppSettings.Builder appInfo = null;
+    AppInfoProto.AppInfo.Builder appInfo = null;
 
     private Context context = null;
 
@@ -97,13 +97,13 @@ public class FileManipulationsApplicationInfo extends Service {
     public int getLastSaveTime(){
         if(!initialized)
             appInfo = readDataFromMemory();
-        return appInfo.getLastSaveTime();
+        return appInfo.getLastSaveAttemptTime();
     }
 
     public void setLastSaveTime(int elapsedRealtimeInSeconds){
         if(!initialized)
             appInfo = readDataFromMemory();
-        appInfo.setLastSaveTime(elapsedRealtimeInSeconds);
+        appInfo.setLastSaveAttemptTime(elapsedRealtimeInSeconds);
         try {
             writeDataToMemory(appInfo.build());
         } catch (IOException e) {
@@ -134,7 +134,7 @@ public class FileManipulationsApplicationInfo extends Service {
      * Creates empty proto with default application values in it
      */
     private void prefillWithData(){
-        SettingsProto.AppSettings.Builder appInfo = SettingsProto.AppSettings.newBuilder();
+        AppInfoProto.AppInfo.Builder appInfo = AppInfoProto.AppInfo.newBuilder();
         appInfo.setSsid("AndroidWifi");
         appInfo.setMaxBreakTime(10 * 60);
         try {
@@ -148,10 +148,10 @@ public class FileManipulationsApplicationInfo extends Service {
     /**
      * Reads AppSetting data from application memory
      *
-     * @return - returns ready builder containing AppSettings
+     * @return - returns ready builder containing AppInfo
      */
-    private SettingsProto.AppSettings.Builder readDataFromMemory(){
-        SettingsProto.AppSettings.Builder appInfo = SettingsProto.AppSettings.newBuilder();
+    private AppInfoProto.AppInfo.Builder readDataFromMemory(){
+        AppInfoProto.AppInfo.Builder appInfo = AppInfoProto.AppInfo.newBuilder();
         // Read the existing data file.
         try {
             appInfo.mergeFrom(context.openFileInput(APPLICATION_DATA_FILENAME));
@@ -177,7 +177,7 @@ public class FileManipulationsApplicationInfo extends Service {
      * @param data - data to write (overwrite!)
      * @throws IOException - when file couldn't be saved
      */
-    private void writeDataToMemory(SettingsProto.AppSettings data) throws IOException{
+    private void writeDataToMemory(AppInfoProto.AppInfo data) throws IOException{
         data.writeTo(context.openFileOutput(APPLICATION_DATA_FILENAME, MODE_PRIVATE));
     }
 }
