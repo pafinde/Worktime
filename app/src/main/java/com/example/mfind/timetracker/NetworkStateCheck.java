@@ -22,9 +22,6 @@ import android.util.Log;
 
 import java.time.LocalDateTime;
 
-import javax.security.auth.login.LoginException;
-
-import static android.content.Intent.ACTION_BATTERY_LOW;
 import static com.example.mfind.timetracker.MainActivity.changeSecondsToFormat;
 import static java.lang.Thread.sleep;
 
@@ -35,6 +32,7 @@ public class NetworkStateCheck extends Service {
     private int maxBreakTime = 0;
     private String currentNetworkSSID = "";
     private Boolean currentWifiIsCorrect = false;
+    private int serviceDowntime = 0;
 
     private static final String CHANNEL_ID = "ZPWT notification - service is working";
     private long connectionCurrentTime;
@@ -126,6 +124,11 @@ public class NetworkStateCheck extends Service {
             temp = (int)(SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
             connectionCurrentTime = SystemClock.elapsedRealtime();
             Log.i(TAG, "### saveYourData: Saving data! " + temp + "s");
+
+            doBindInfo();
+            fmai.setLastSaveTime((int)SystemClock.elapsedRealtime()/1000);
+            doUnbindInfo();
+
             return saveData(temp);
         }
         return saveData(0);
@@ -205,6 +208,16 @@ public class NetworkStateCheck extends Service {
     }
 
     /**
+     * @return - returns downtime for debugging purposes
+     */
+    public String getDowntime(){
+        if(serviceDowntime != 0)
+            return changeSecondsToFormat(serviceDowntime);
+        else
+            return "-PHONE-RESTARTED-";
+    }
+
+    /**
      * Reads already saved wifi SSID regex and currently saved max break time as saved in
      * application memory
      */
@@ -212,6 +225,8 @@ public class NetworkStateCheck extends Service {
         doBindInfo();
         wifiSSIDRegexp = fmai.getSSID();
         maxBreakTime = fmai.getMaxBreakTime();
+        int lastSave = fmai.getLastSaveTime();
+        serviceDowntime = lastSave == 0 ? 0 : (int)(SystemClock.elapsedRealtime()/1000 - lastSave);
         doUnbindInfo();
     }
 

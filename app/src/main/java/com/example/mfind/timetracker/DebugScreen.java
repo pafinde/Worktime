@@ -63,6 +63,9 @@ public class DebugScreen extends AppCompatActivity {
             t = findViewById(R.id.connectedToWifiFor);
             t.setText("We are connected to wifi for " + mServerReceiver.getHowLongAgoWeConnectedToWifi());
 
+            t = findViewById(R.id.serviceDowntime);
+            t.setText("Approx. downtime: " + mServerReceiver.getDowntime());
+
         }
 
         @Override

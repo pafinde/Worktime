@@ -34,6 +34,15 @@ public final class SettingsProto {
      * <code>optional int32 max_break_time = 2;</code>
      */
     int getMaxBreakTime();
+
+    /**
+     * <code>optional int32 last_save_time = 3;</code>
+     */
+    boolean hasLastSaveTime();
+    /**
+     * <code>optional int32 last_save_time = 3;</code>
+     */
+    int getLastSaveTime();
   }
   /**
    * Protobuf type {@code timetracker.AppSettings}
@@ -127,6 +136,35 @@ public final class SettingsProto {
       maxBreakTime_ = 0;
     }
 
+    public static final int LAST_SAVE_TIME_FIELD_NUMBER = 3;
+    private int lastSaveTime_;
+    /**
+     * <code>optional int32 last_save_time = 3;</code>
+     */
+    public boolean hasLastSaveTime() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int32 last_save_time = 3;</code>
+     */
+    public int getLastSaveTime() {
+      return lastSaveTime_;
+    }
+    /**
+     * <code>optional int32 last_save_time = 3;</code>
+     */
+    private void setLastSaveTime(int value) {
+      bitField0_ |= 0x00000004;
+      lastSaveTime_ = value;
+    }
+    /**
+     * <code>optional int32 last_save_time = 3;</code>
+     */
+    private void clearLastSaveTime() {
+      bitField0_ = (bitField0_ & ~0x00000004);
+      lastSaveTime_ = 0;
+    }
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
             throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
@@ -134,6 +172,9 @@ public final class SettingsProto {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(2, maxBreakTime_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, lastSaveTime_);
       }
       unknownFields.writeTo(output);
     }
@@ -150,6 +191,10 @@ public final class SettingsProto {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
                 .computeInt32Size(2, maxBreakTime_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+                .computeInt32Size(3, lastSaveTime_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSerializedSize = size;
@@ -313,6 +358,35 @@ public final class SettingsProto {
         return this;
       }
 
+      /**
+       * <code>optional int32 last_save_time = 3;</code>
+       */
+      public boolean hasLastSaveTime() {
+        return instance.hasLastSaveTime();
+      }
+      /**
+       * <code>optional int32 last_save_time = 3;</code>
+       */
+      public int getLastSaveTime() {
+        return instance.getLastSaveTime();
+      }
+      /**
+       * <code>optional int32 last_save_time = 3;</code>
+       */
+      public Builder setLastSaveTime(int value) {
+        copyOnWrite();
+        instance.setLastSaveTime(value);
+        return this;
+      }
+      /**
+       * <code>optional int32 last_save_time = 3;</code>
+       */
+      public Builder clearLastSaveTime() {
+        copyOnWrite();
+        instance.clearLastSaveTime();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:timetracker.AppSettings)
     }
     protected final Object dynamicMethod(
@@ -340,6 +414,9 @@ public final class SettingsProto {
           maxBreakTime_ = visitor.visitInt(
                   hasMaxBreakTime(), maxBreakTime_,
                   other.hasMaxBreakTime(), other.maxBreakTime_);
+          lastSaveTime_ = visitor.visitInt(
+                  hasLastSaveTime(), lastSaveTime_,
+                  other.hasLastSaveTime(), other.lastSaveTime_);
           if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
                   .INSTANCE) {
             bitField0_ |= other.bitField0_;
@@ -374,6 +451,11 @@ public final class SettingsProto {
                 case 16: {
                   bitField0_ |= 0x00000002;
                   maxBreakTime_ = input.readInt32();
+                  break;
+                }
+                case 24: {
+                  bitField0_ |= 0x00000004;
+                  lastSaveTime_ = input.readInt32();
                   break;
                 }
               }

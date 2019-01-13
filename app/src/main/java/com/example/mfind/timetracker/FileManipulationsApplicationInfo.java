@@ -94,6 +94,24 @@ public class FileManipulationsApplicationInfo extends Service {
         return appInfo.getMaxBreakTime();
     }
 
+    public int getLastSaveTime(){
+        if(!initialized)
+            appInfo = readDataFromMemory();
+        return appInfo.getLastSaveTime();
+    }
+
+    public void setLastSaveTime(int elapsedRealtimeInSeconds){
+        if(!initialized)
+            appInfo = readDataFromMemory();
+        appInfo.setLastSaveTime(elapsedRealtimeInSeconds);
+        try {
+            writeDataToMemory(appInfo.build());
+        } catch (IOException e) {
+            Log.e(TAG, "### setLastSaveTime: Output stream error.");
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Used to set and save wifi ssid regex to application memory
      * @param ssid - string containing wifi ssid regex
