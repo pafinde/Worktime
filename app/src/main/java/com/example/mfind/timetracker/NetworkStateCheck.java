@@ -390,7 +390,6 @@ public class NetworkStateCheck extends Service {
                 } else {
                     Log.d(TAG, "### ### ### onReceive: HOW COULD THAT HAPPEN??? That's the only action I'm looking for!");
                 }
-
             }
         };
         IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);

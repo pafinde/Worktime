@@ -8,4 +8,6 @@
     <string name="previous_30_days_str">Previous 30 days:</string>
     <string name="previous_90_days_str">Previous 90 days:</string>
     <string name="previous_7_days_str">Previous 7 days:</string>
+    <string name="dialog_text">Sorry, the app crashed. Please send report to the developers.</string>
+    <string name="dialog_comment">You can add comment here:</string>
 </resources>
