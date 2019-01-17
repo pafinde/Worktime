@@ -60,7 +60,10 @@ public class PeriodicalSave extends JobService {
             public void run() {
                 Intent mIntentSR = new Intent(getApplicationContext(), NetworkStateCheck.class);
                 startForegroundService(mIntentSR);
-                bindService(mIntentSR, mConnectionToReceiver, BIND_AUTO_CREATE);
+
+                synchronized (PeriodicalSave.class) {
+                    bindService(mIntentSR, mConnectionToReceiver, BIND_AUTO_CREATE);
+                }
 
                 while(!mBoundedReceiver){
                     try {
@@ -74,9 +77,11 @@ public class PeriodicalSave extends JobService {
 
                 mServerReceiver.saveYourData();
 
-                if(mBoundedReceiver) {
-                    unbindService(mConnectionToReceiver);
-                    mBoundedReceiver = false;
+                synchronized (PeriodicalSave.class) {
+                    if (mBoundedReceiver) {
+                        unbindService(mConnectionToReceiver);
+                        mBoundedReceiver = false;
+                    }
                 }
 
                 jobFinished(params, false);
@@ -90,18 +95,22 @@ public class PeriodicalSave extends JobService {
     ServiceConnection mConnectionToReceiver = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if(!mBoundedReceiver) {
-                NetworkStateCheck.LocalBinder mLocalBinder = (NetworkStateCheck.LocalBinder) service;
-                mServerReceiver = mLocalBinder.getServerInstance();
-                mBoundedReceiver = true;
+            synchronized (PeriodicalSave.class) {
+                if (!mBoundedReceiver) {
+                    NetworkStateCheck.LocalBinder mLocalBinder = (NetworkStateCheck.LocalBinder) service;
+                    mServerReceiver = mLocalBinder.getServerInstance();
+                    mBoundedReceiver = true;
+                }
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            if(mBoundedReceiver) {
-                mBoundedReceiver = false;
-                mServerReceiver = null;
+            synchronized (PeriodicalSave.class) {
+                if (mBoundedReceiver) {
+                    mBoundedReceiver = false;
+                    mServerReceiver = null;
+                }
             }
         }
     };
