@@ -121,7 +121,7 @@ public class NetworkStateCheck extends Service {
         Log.i(TAG, "### saveYourData: Attempt to save!");
 
         doBindInfo();
-        fmai.setLastSaveTime((int)SystemClock.elapsedRealtime()/1000);
+        fmai.setLastSaveTime((int)(SystemClock.elapsedRealtime()/1000));
         doUnbindInfo();
 
         if(currentWifiIsCorrect){
@@ -211,7 +211,7 @@ public class NetworkStateCheck extends Service {
      * @return - returns downtime for debugging purposes
      */
     public String getDowntime(){
-        if(serviceDowntime != 0)
+        if(serviceDowntime > 0)
             return changeSecondsToFormat(serviceDowntime);
         else
             return "-PHONE-RESTARTED-";
@@ -227,6 +227,7 @@ public class NetworkStateCheck extends Service {
         maxBreakTime = fmai.getMaxBreakTime();
         int lastSave = fmai.getLastSaveTime();
         serviceDowntime = lastSave == 0 ? 0 : (int)(SystemClock.elapsedRealtime()/1000 - lastSave);
+        serviceDowntime = serviceDowntime <= 0 ? 0 : serviceDowntime;
         doUnbindInfo();
     }
 
