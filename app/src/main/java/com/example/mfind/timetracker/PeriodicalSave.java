@@ -18,9 +18,6 @@ import static java.lang.Thread.sleep;
 public class PeriodicalSave extends JobService {
     private static final String TAG = "PeriodicalSave";
 
-    boolean mBoundedReceiver = false;
-    NetworkStateCheck mServerReceiver;
-
     /**
      * When Job scheduler runs our job, it actually starts this method
      *
@@ -56,16 +53,41 @@ public class PeriodicalSave extends JobService {
      */
     private void doBackgroundWork(final JobParameters params) {
         new Thread(new Runnable() {
+            NetworkStateCheck mServerReceiver = null;
+
             @Override
             public void run() {
                 Intent mIntentSR = new Intent(getApplicationContext(), NetworkStateCheck.class);
                 startForegroundService(mIntentSR);
 
+                // Interface used for connection with BroadcastReceiver Service
+                ServiceConnection mConnectionToReceiver = new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        synchronized (PeriodicalSave.class) {
+                            if (mServerReceiver == null) {
+                                NetworkStateCheck.LocalBinder mLocalBinder = (NetworkStateCheck.LocalBinder) service;
+                                mServerReceiver = mLocalBinder.getServerInstance();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        synchronized (PeriodicalSave.class) {
+                            mServerReceiver = null;
+                        }
+                    }
+                };
+
                 synchronized (PeriodicalSave.class) {
-                    bindService(mIntentSR, mConnectionToReceiver, BIND_AUTO_CREATE);
+                    if(!bindService(mIntentSR, mConnectionToReceiver, BIND_AUTO_CREATE)){
+                        // Service does not exist (or we have no permission to access it).
+                        return;
+                    }
                 }
 
-                while(!mBoundedReceiver){
+                while(mServerReceiver == null){
                     try {
                         Log.i(TAG, "### run: Sleep required! Sleeping...");
                         sleep(2 * 1000);
@@ -78,41 +100,11 @@ public class PeriodicalSave extends JobService {
                 mServerReceiver.saveYourData();
 
                 synchronized (PeriodicalSave.class) {
-                    if (mBoundedReceiver) {
-                        unbindService(mConnectionToReceiver);
-                        mBoundedReceiver = false;
-                    }
+                    unbindService(mConnectionToReceiver);
                 }
 
                 jobFinished(params, false);
             }
         }).start();
     }
-
-    /**
-     * Interface used for connection between this class (MainActivity) and BroadcastReceiver Service
-     */
-    ServiceConnection mConnectionToReceiver = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            synchronized (PeriodicalSave.class) {
-                if (!mBoundedReceiver) {
-                    NetworkStateCheck.LocalBinder mLocalBinder = (NetworkStateCheck.LocalBinder) service;
-                    mServerReceiver = mLocalBinder.getServerInstance();
-                    mBoundedReceiver = true;
-                }
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            synchronized (PeriodicalSave.class) {
-                if (mBoundedReceiver) {
-                    mBoundedReceiver = false;
-                    mServerReceiver = null;
-                }
-            }
-        }
-    };
-
 }
