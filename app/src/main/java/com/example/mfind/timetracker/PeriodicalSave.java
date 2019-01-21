@@ -17,6 +17,7 @@ import static java.lang.Thread.sleep;
  */
 public class PeriodicalSave extends JobService {
     private static final String TAG = "PeriodicalSave";
+    Boolean jobCancelled = false;
 
     /**
      * When Job scheduler runs our job, it actually starts this method
@@ -28,6 +29,7 @@ public class PeriodicalSave extends JobService {
     @Override
     public boolean onStartJob(JobParameters params) {
         Log.i(TAG, "### nStartJob: job started");
+        jobCancelled = false;
         doBackgroundWork(params);
         return true;
     }
@@ -42,6 +44,9 @@ public class PeriodicalSave extends JobService {
     @Override
     public boolean onStopJob(JobParameters params) {
         Log.i(TAG, "### onStopJob: job cancelled");
+        synchronized (PeriodicalSave.class) {
+            jobCancelled = true;
+        }
         return true;
     }
 
@@ -88,6 +93,10 @@ public class PeriodicalSave extends JobService {
                 }
 
                 while(mServerReceiver == null){
+                    if(jobCancelled){
+                        Log.w(TAG, "### run: job cancelled by system! Aborting...");
+                        return;
+                    }
                     try {
                         Log.i(TAG, "### run: Sleep required! Sleeping...");
                         sleep(2 * 1000);
@@ -100,6 +109,10 @@ public class PeriodicalSave extends JobService {
                 mServerReceiver.saveYourData();
 
                 synchronized (PeriodicalSave.class) {
+                    if(jobCancelled){
+                        Log.w(TAG, "### run: job cancelled by system! Aborting...");
+                        return;
+                    }
                     unbindService(mConnectionToReceiver);
                 }
 
