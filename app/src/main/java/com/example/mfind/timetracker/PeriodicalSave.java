@@ -17,7 +17,7 @@ import static java.lang.Thread.sleep;
  */
 public class PeriodicalSave extends JobService {
     private static final String TAG = "PeriodicalSave";
-    Boolean jobCancelled = false;
+    boolean jobCancelled = false;
 
     /**
      * When Job scheduler runs our job, it actually starts this method
@@ -93,9 +93,15 @@ public class PeriodicalSave extends JobService {
                 }
 
                 while(mServerReceiver == null){
-                    if(jobCancelled){
-                        Log.w(TAG, "### run: job cancelled by system! Aborting...");
-                        return;
+                    synchronized (PeriodicalSave.class) {
+                        if (mServerReceiver != null) {
+                            Log.i(TAG, "### run: Connected.");
+                            break;
+                        }
+                        if(jobCancelled){
+                            Log.w(TAG, "### run: job cancelled by system! Aborting...");
+                            return;
+                        }
                     }
                     try {
                         Log.i(TAG, "### run: Sleep required! Sleeping...");
