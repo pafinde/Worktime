@@ -40,7 +40,7 @@ public class FileManipulationsPersistentData extends Service {
 
     private static final String TAG = "FileManipulationsPersis";
     
-    private String CONNECTION_DATA_FILENAME = "ZPWT_WifiConnectionDataList.bin";
+    private String CONNECTION_DATA_FILENAME = "WifiConnectionDataList.bin";
     protected int todayTicker;
     protected int average7;
     protected int average30;

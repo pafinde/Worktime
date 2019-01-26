@@ -35,8 +35,8 @@ import java.io.IOException;
  * application info proto
  */
 public class FileManipulationsApplicationInfo extends Service {
-    private static final String TAG = "FileManipulationsApplic";
-    private String APPLICATION_DATA_FILENAME = "ZPWT_ApplicationData.bin";
+    private static final String TAG = "FileManipulationsAppInfo";
+    private String APPLICATION_DATA_FILENAME = "ApplicationData.bin";
 
     boolean initialized = false;
     AppInfoProto.AppInfo.Builder appInfo = null;
