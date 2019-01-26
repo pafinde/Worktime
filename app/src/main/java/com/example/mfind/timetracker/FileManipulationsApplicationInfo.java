@@ -135,7 +135,7 @@ public class FileManipulationsApplicationInfo extends Service {
      */
     private void prefillWithData(){
         AppInfoProto.AppInfo.Builder appInfo = AppInfoProto.AppInfo.newBuilder();
-        appInfo.setSsid("AndroidWifi");
+        appInfo.setSsid(".*Office.*");
         appInfo.setMaxBreakTime(10 * 60);
         try {
             writeDataToMemory(appInfo.build());
