@@ -19,6 +19,15 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/todayTicker"
+        android:layout_width="100dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="66dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/todayText" />
+
+    <TextView
         android:id="@+id/averageText"
         android:layout_width="151dp"
         android:layout_height="57dp"
@@ -67,6 +76,14 @@
         app:layout_constraintTop_toBottomOf="@+id/average30Text" />
 
     <TextView
+        android:id="@+id/average7Data"
+        android:layout_width="100dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/average7text"
+        app:layout_constraintStart_toEndOf="@+id/average7text" />
+
+    <TextView
         android:id="@+id/average30Data"
         android:layout_width="100dp"
         android:layout_height="32dp"
@@ -83,21 +100,16 @@
         app:layout_constraintStart_toEndOf="@+id/average90Text" />
 
     <TextView
-        android:id="@+id/average7Data"
-        android:layout_width="100dp"
-        android:layout_height="32dp"
+        android:id="@+id/swipeInfoText"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/average7text"
-        app:layout_constraintStart_toEndOf="@+id/average7text" />
-
-    <TextView
-        android:id="@+id/todayTicker"
-        android:layout_width="100dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="66dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/swipe_info_str"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/todayText" />
+        app:layout_constraintTop_toBottomOf="@+id/average90Data" />
 
     <ImageButton
         android:id="@+id/imageButton"
