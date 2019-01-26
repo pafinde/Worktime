@@ -34,7 +34,7 @@ public class NetworkStateCheck extends Service {
     private Boolean currentWifiIsCorrect = false;
     private int serviceDowntime = 0;
 
-    private static final String CHANNEL_ID = "ZPWT notification - service is working";
+    private static final String CHANNEL_ID = "Worktime notification - service is working";
     private long connectionCurrentTime;
     private long connectionStartTime;
 
@@ -243,8 +243,8 @@ public class NetworkStateCheck extends Service {
             String channelID = "This_is_my_channel_ha!";
             NotificationCompat.Builder notification = new NotificationCompat.Builder(context, channelID);
             notification.setSmallIcon(R.drawable.ic_launcher_foreground)
-                    .setContentTitle("Zero-touch Personal Worktime Tracker")
-                    .setContentText("Watching over your WiFi connection")
+                    .setContentTitle("Worktime WiFi tracking")
+                    .setContentText("Watching your WiFi status to detect location")
                     .setShowWhen(false)
                     .setContentIntent(pendingIntent);
             createNotificationChannel();
@@ -263,7 +263,7 @@ public class NetworkStateCheck extends Service {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String description = "This is your ZPWT";
+            String description = "Worktime tracker notification channel";
             int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel = new NotificationChannel("This_is_my_channel_ha!", CHANNEL_ID, importance);
             channel.setDescription(description);
