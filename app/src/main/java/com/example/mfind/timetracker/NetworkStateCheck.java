@@ -286,8 +286,7 @@ public class NetworkStateCheck extends Service {
         super.onDestroy();
         Log.d(TAG, "### ### ### onDestroy: because we run in foreground, we should not ever be destroyed, unless in critical memory condition or when shutting down phone?");
         //to create a crash report...
-
-        Log.e(TAG, "### onDestroy: " + 1/0);
+        // Log.e(TAG, "### onDestroy: " + 1/0);
 
         //unregisterReceiver(mWifiStateChangeReceiver);
         //mWifiStateChangeReceiver = null;
