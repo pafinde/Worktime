@@ -4,7 +4,8 @@ apply plugin: 'com.google.protobuf' // protobuf
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.mfind.zpwtzerotouchpersonalwifitimetracker"
+        // This id identifies application data on user devices.
+        applicationId "com.example.pafinde.worktime"
         minSdkVersion 26
         targetSdkVersion 28
         versionCode 1
