@@ -10,7 +10,7 @@ import android.util.Log;
 
 import static java.lang.Thread.sleep;
 
-/** TODO change this
+/**
  * This class is periodically invoked by job scheduler.
  *
  * it handles periodical save by invoking saveYourData() in BroadcastReceiver Service
