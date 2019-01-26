@@ -11,4 +11,6 @@
     <string name="swipe_info_str">Swipe right to edit, swipe left for info.</string>
     <string name="dialog_text">Sorry, the app crashed. Please send report to the developers.</string>
     <string name="dialog_comment">You can add comment here:</string>
+    <string name="legal_str">This application comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under the conditions of the GPL verion 3 or later.
+                 See www.gnu.org/licenses/gpl.html and github.com/pafinde/Worktime .</string>
 </resources>
