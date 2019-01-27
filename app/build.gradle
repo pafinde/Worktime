@@ -2,10 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.protobuf' // protobuf
 
 android {
+    signingConfigs {
+        config {
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         // This id identifies application data on user devices.
-        applicationId "com.android.pafinde.worktime"
+        applicationId "com.github.pafinde.worktime"
         minSdkVersion 26
         targetSdkVersion 28
         versionCode 1
@@ -28,7 +32,6 @@ android {
     }
     productFlavors {
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
