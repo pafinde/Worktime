@@ -3,12 +3,9 @@
     package="com.example.mfind.timetracker">
 
     <uses-feature
-        android:name="android.net.wifi.WifiManager"
+        android:name="android.hardware.wifi"
         android:required="true" />
-    <uses-feature
-        android:name="android.net.wifi.WifiInfo"
-        android:required="true" />
-    <!-- <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="28" /> -->
+    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="28" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
