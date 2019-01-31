@@ -10,9 +10,9 @@ android {
     defaultConfig {
         // This id identifies application data on user devices.
         applicationId "com.github.pafinde.worktime"
-        minSdkVersion 26
+        minSdkVersion 22
         targetSdkVersion 28
-        versionCode 1
+        versionCode 3
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
