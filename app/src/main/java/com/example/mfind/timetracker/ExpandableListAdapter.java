@@ -280,7 +280,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
      * Informs user that their input was incorrect
      */
     private void errorHandler(){
-        Toast.makeText(context, "Sorry, but your input hasn't met the criteria!", Toast.LENGTH_LONG).show();
+        Toast.makeText(context, "Parse error. Duration needs to be close to ISO format.", Toast.LENGTH_LONG).show();
     }
 
     @Override
