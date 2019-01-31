@@ -34,7 +34,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
-import android.text.LoginFilter;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -43,8 +42,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
-
-import static java.lang.Thread.sleep;
 
 /**
  * MainActivity is the main screen we can see when launching app for the first time.
@@ -152,12 +149,9 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     while (!this.isInterrupted() && inForeground) {
                         Thread.sleep(1000);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                refreshValues();
-                                Log.i(TAG, "### run: ....");
-                            }
+                        runOnUiThread(() -> {
+                            refreshValues();
+                            Log.i(TAG, "### run: ....");
                         });
                     }
                 } catch (InterruptedException e) {
@@ -277,21 +271,24 @@ public class MainActivity extends AppCompatActivity {
      */
     private void scheduleJob(){
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        List<JobInfo> pendingJobs = jobScheduler.getAllPendingJobs();
-        if(pendingJobs.isEmpty()) {
+        List<JobInfo> pendingJobs;
+        if (jobScheduler != null) {
+            pendingJobs = jobScheduler.getAllPendingJobs();
+            if(pendingJobs.isEmpty()) {
 
-            ComponentName compName = new ComponentName(this, PeriodicalSave.class);
-            JobInfo.Builder info = new JobInfo.Builder(1, compName)
-                    .setPeriodic(15 * 60 * 1000, 60 * 1000) // job is set to fire regularly every 15 minutes, with up to 5 minutes of fluctuation
-                    .setPersisted(true);
-            //if (Build.VERSION.SDK_INT >= 28)
-            //    info.setImportantWhileForeground(true);
+                ComponentName compName = new ComponentName(this, PeriodicalSave.class);
+                JobInfo.Builder info = new JobInfo.Builder(1, compName)
+                        .setPeriodic(15 * 60 * 1000, 60 * 1000) // job is set to fire regularly every 15 minutes, with up to 5 minutes of fluctuation
+                        .setPersisted(true);
+                //if (Build.VERSION.SDK_INT >= 28)
+                //    info.setImportantWhileForeground(true);
 
-            int resultCode = jobScheduler.schedule(info.build());
-            if (resultCode == JobScheduler.RESULT_SUCCESS)
-                Log.i(TAG, "### scheduleJob: Job starts now, doing this every approx. 15 minutes");
-            else
-                Log.e(TAG, "### ### ### scheduleJob: failure!");
+                int resultCode = jobScheduler.schedule(info.build());
+                if (resultCode == JobScheduler.RESULT_SUCCESS)
+                    Log.i(TAG, "### scheduleJob: Job starts now, doing this every approx. 15 minutes");
+                else
+                    Log.e(TAG, "### ### ### scheduleJob: failure!");
+            }
         }
     }
 

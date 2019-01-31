@@ -45,7 +45,7 @@ public class EntriesEditor extends AppCompatActivity {
      *
      * This prepares elements to be displayed on the screen and sends them to
      * ExpandableListAdapter.class
-     * @param savedInstanceState
+     * @param savedInstanceState used by super.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {

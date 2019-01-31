@@ -69,7 +69,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
     @Override
     public int getChildrenCount(int i) {
-        return listHashMap.get(listDataHeader.get(i)).size();
+        return Objects.requireNonNull(listHashMap.get(listDataHeader.get(i))).size();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
     @Override
     public Object getChild(int i, int i1) {
-        return listHashMap.get(listDataHeader.get(i)).get(i1); // i = Group Item , i1 = ChildItem
+        return Objects.requireNonNull(listHashMap.get(listDataHeader.get(i))).get(i1); // i = Group Item , i1 = ChildItem
     }
 
     @Override
@@ -139,47 +139,36 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         if (txtListChild != null) {
             txtListChild.setText(childText);
 
-            txtListChild.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            txtListChild.setOnClickListener(v -> {
 
-                    entryindex = findIndexOfElemByView(v);
+                entryindex = findIndexOfElemByView(v);
 
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-                    dialog.setTitle("Enter your edit (HOURS, MINUTES and SECONDS, in that order)");
+                AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+                dialog.setTitle("Enter your edit (HOURS and/or MINUTES, in that order)");
 
-                    LinearLayout layout = new LinearLayout(context);
-                    layout.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
 
-                    final EditText inputTime = new EditText(context);
-                    inputTime.setHint("[-PT][-]%dh [-]%dm");
-                    layout.addView(inputTime); // Notice this is an add method
+                final EditText inputTime = new EditText(context);
+                inputTime.setHint("[-PT][-]%dh [-]%dm");
+                layout.addView(inputTime); // Notice this is an add method
 
-                    final EditText inputComment = new EditText(context);
-                    inputComment.setHint("Description");
-                    layout.addView(inputComment); // Another add method
+                final EditText inputComment = new EditText(context);
+                inputComment.setHint("Description");
+                layout.addView(inputComment); // Another add method
 
-                    dialog.setView(layout);
+                dialog.setView(layout);
 
-                    // Set up the buttons: positive - changer
-                    dialog.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String userInput = inputTime.getText().toString();
-                            String userComment = inputComment.getText().toString();
-                            Log.i(TAG, "### onClick: Edited entry with " + userInput + " and comment: " + userComment);
-                            enterAnEdit(entryindex, userComment, userInput);
-                        }
-                    });
-                    // Set up the buttons: negative - no changer
-                    dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    dialog.show();
-                }
+                // Set up the buttons: positive - changer
+                dialog.setPositiveButton("Submit", (dialog1, which) -> {
+                    String userInput = inputTime.getText().toString();
+                    String userComment = inputComment.getText().toString();
+                    Log.i(TAG, "### onClick: Edited entry with " + userInput + " and comment: " + userComment);
+                    enterAnEdit(entryindex, userComment, userInput);
+                });
+                // Set up the buttons: negative - no changer
+                dialog.setNegativeButton("Cancel", (dialog12, which) -> dialog12.cancel());
+                dialog.show();
             });
         }
 

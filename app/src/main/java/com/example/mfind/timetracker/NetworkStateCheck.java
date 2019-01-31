@@ -115,23 +115,24 @@ public class NetworkStateCheck extends Service {
 
     /**
      * saves current ticker if possible
-     * @return - wither way, returns today ticker
      */
-    public int saveYourData(){
+    public void saveYourData(){
         Log.i(TAG, "### saveYourData: Attempt to save!");
 
         doBindInfo();
         fmai.setLastSaveTime((int)(SystemClock.elapsedRealtime()/1000));
         doUnbindInfo();
 
+        int seconds;
         if(currentWifiIsCorrect){
             int temp;
             temp = (int)(SystemClock.elapsedRealtime() - connectionCurrentTime)/1000;
             connectionCurrentTime = SystemClock.elapsedRealtime();
             Log.i(TAG, "### saveYourData: Saving data! " + temp + "s");
-            return saveData(temp);
-        }
-        return saveData(0);
+            seconds = saveData(temp);
+        }else
+            seconds = saveData(0);
+        Log.i(TAG, "### saveYourData: Today saved time: " + MainActivity.changeSecondsToFormat(seconds));
     }
 
     /**
@@ -375,9 +376,7 @@ public class NetworkStateCheck extends Service {
      */
     private void registerWifiChangeReceiver()
     {
-        /**
-         * broadcast Receiver - used to detect network change
-         */
+        // broadcast Receiver - used to detect network change
         BroadcastReceiver mWifiStateChangeReceiver = new BroadcastReceiver() {
             /**
              * Invoked when someone broadcasted signal we are registered for
