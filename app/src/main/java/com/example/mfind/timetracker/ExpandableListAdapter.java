@@ -144,7 +144,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 entryindex = findIndexOfElemByView(v);
 
                 AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-                dialog.setTitle("Enter your edit (HOURS and/or MINUTES, in that order)");
+                dialog.setTitle("Enter duration to add to your worklog");
 
                 LinearLayout layout = new LinearLayout(context);
                 layout.setOrientation(LinearLayout.VERTICAL);
