@@ -150,7 +150,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
                 layout.setOrientation(LinearLayout.VERTICAL);
 
                 final EditText inputTime = new EditText(context);
-                inputTime.setHint("[-PT][-]%dh [-]%dm");
+                inputTime.setHint("eg. 1h -5m or -1h or ISO format");
                 layout.addView(inputTime); // Notice this is an add method
 
                 final EditText inputComment = new EditText(context);
@@ -209,7 +209,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
             minutes = parseUserInput(edit);
         } catch (ParseException | NullPointerException e) {
             Log.e(TAG, "### ### ### parse or nullpointer exception!");
-            errorHandler();
+            errorHandler(e.getMessage());
             return;
         }
 
@@ -245,6 +245,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
         if(edit.charAt(0) != '-' && !isDigit(edit.charAt(0))){
             throw new ParseException("First char is neither digit nor '-'", 0);
         }
+
+        if (edit.matches("^-\\d+[HM]")) {
+            // Simple case of negation is non-ambiguous, we can insert PT:
+            edit = edit.replaceFirst("^-", "-PT");
+        }
+
         if(edit.startsWith("-") && !edit.startsWith("-PT")){
             throw new ParseException("'-' without 'PT'", 0);
         }
@@ -268,8 +274,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
     /**
      * Informs user that their input was incorrect
      */
-    private void errorHandler(){
-        Toast.makeText(context, "Parse error. Duration needs to be close to ISO format.", Toast.LENGTH_LONG).show();
+    private void errorHandler(String message){
+        Toast.makeText(context, "Parse error. Stick closer to ISO format: " + message, Toast.LENGTH_LONG).show();
     }
 
     @Override

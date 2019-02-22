@@ -32,12 +32,20 @@ public class ParserTest {
         int test = parseUserInput("0m");
         assertEquals(0, test);
     }
-    @Test public void testAddingMinus2m() {
-        expectParseException("-2m");
-    }
     @Test public void testAddingMinusPT2m() throws ParseException {
             int test = parseUserInput("-PT2m");
             assertEquals(-2, test);
+    }
+    @Test public void testSimpleMinus() throws ParseException {
+        assertEquals(-2, parseUserInput("-2m"));
+        assertEquals(-2, parseUserInput(" -2m"));
+        assertEquals(-2, parseUserInput("-2m "));
+        assertEquals(58, parseUserInput("1h -2m"));
+
+    }
+    @Test public void testAmbiguousMinus() {
+        expectParseException("-2m 5m");
+        expectParseException("-2m -5m");
     }
     @Test public void testAddingMinusP2m() {
         expectParseException("-P2m");
