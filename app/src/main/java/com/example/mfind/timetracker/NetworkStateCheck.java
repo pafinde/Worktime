@@ -2,6 +2,7 @@
 
 package com.example.mfind.timetracker;
 
+import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -18,6 +20,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.time.LocalDateTime;
@@ -306,6 +309,35 @@ public class NetworkStateCheck extends Service {
         super.onLowMemory();
     }
 
+    String FetchNetworkSSID(){
+        while(true){
+            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            if (wifiManager == null) {
+                return "<null>";
+            }
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            if (wifiInfo == null) {
+                return "<null>";
+            }
+            String ssid = wifiInfo.getSSID();
+            ssid = ssid.replaceAll("^\"|\"$", ""); // ?
+            // We get <unknown ssid> if we lack permission, or WiFi is still initializing.
+            if (!ssid.equals("<unknown ssid>")) {
+                return ssid;
+            }
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return "<denied>";
+            }
+            // We need to sleep and retry here, to be able to handle WiFi notifications.
+            try {
+                sleep(500);
+            } catch (InterruptedException e) {
+                return "<interrupted>";
+            }
+        }
+    }
+
     /**
      * Starts, stops or ignores wifi change and starts or stops counting if necessary
      * @param type - Boolean - true if currently connected to wifi, false if otherwise
@@ -316,27 +348,7 @@ public class NetworkStateCheck extends Service {
                 Log.i(TAG, "### startOrStopCounting: repeated signal detected");
                 return;
             }
-            // e.g. To check the Network Name or other info:
-            do{
-                currentNetworkSSID = ""; // emptying - might be needed
-                try {
-                    // we actually need to wait few seconds,
-                    // if we won't do that, SSID might not yet be propagated
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-                WifiInfo wifiInfo = null;
-                if (wifiManager != null) {
-                    wifiInfo = wifiManager.getConnectionInfo();
-                }
-                if (wifiInfo != null) {
-                    currentNetworkSSID = wifiInfo.getSSID();
-                }
-
-                currentNetworkSSID = currentNetworkSSID.replaceAll("^\"|\"$", "");
-            } while(currentNetworkSSID.equals("<unknown ssid>")); // to detect '<repeat if read was unsuccessful ssid>'
+            currentNetworkSSID = FetchNetworkSSID();
             Log.d(TAG, "### startOrStopCounting: Currently connected to " + currentNetworkSSID);
 
             currentWifiIsCorrect = currentNetworkSSID.matches(wifiSSIDRegexp);
